@@ -28,6 +28,58 @@ function solve(input: string): number {
   return sum;
 }
 
+type NumPos = {
+  num: number;
+  pos: number;
+}
+
+function solve2(input: string): number {
+  const lines = input.split('\n').map((line) => line.trim());
+  const numsAsString = ['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'];
+  let sum = 0;
+
+  for (const line of lines) {
+    const nums: NumPos[] = [];
+
+    // Check for Arabic numerals
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i]!;
+      const convertedValue = parseInt(ch);
+
+      if (isNaN(convertedValue)) {
+        continue;
+      }
+
+      nums.push({ num: convertedValue, pos: i });
+    }
+
+    // Check for spelling
+    for (let i = 0; i < numsAsString.length; i++) {
+      const spell = numsAsString[i]!;
+      const pos1 = line.lastIndexOf(spell);
+      const pos2 = line.indexOf(spell);
+
+      if (pos1 !== -1) {
+        nums.push({ num: i + 1, pos: pos1 });
+      }
+
+      if (pos2 !== -1) {
+        nums.push({ num: i + 1, pos: pos2 });
+      }
+    }
+
+    nums.sort((a, b) => a.pos - b.pos);
+
+    const first = nums[0]!.num;
+    const last = nums[nums.length - 1]!.num;
+
+    const twoDigitNumber = first * 10 + last;
+    sum += twoDigitNumber;
+  }
+
+  return sum;
+}
+
 export function day1() {
   const input = `zlmlk1
 vqjvxtc79mvdnktdsxcqc1sevenone
@@ -1029,6 +1081,8 @@ bmjhkkn4pgf
 qkrsvjclp23
 5fourzllbmcgkxsevengkrzkpvcmvgtxlrv6
 fivetczxxvjrrqfive1sevennvj6one3`;
-  const result = solve(input);
-  console.log(`Day 1: ${result}`);
+  const result1 = solve(input);
+  const result2 = solve2(input);
+  console.log(`Day 1 result 1: ${result1}`);
+  console.log(`Day 1 result 2: ${result2}`);
 }

@@ -65,8 +65,29 @@ function isGamePossible(game: Game, c: Reveal): boolean {
   return true;
 }
 
-function solve(input: string, constraint: Reveal): number {
-  const lines = input.split('\n').map((line) => line.trim());
+function power(game: Game): number {
+  let minRed = 1;
+  let minGreen = 1;
+  let minBlue = 1;
+
+  for (const r of game.reveals) {
+    if (r.red > minRed) {
+      minRed = r.red;
+    }
+
+    if (r.green > minGreen) {
+      minGreen = r.green;
+    }
+
+    if (r.blue > minBlue) {
+      minBlue = r.blue
+    }
+  }
+
+  return minRed * minGreen * minBlue;
+}
+
+function solve(lines: string[], constraint: Reveal): number {
   let sum = 0;
 
   for (let i = 0; i < lines.length; i++) {
@@ -78,6 +99,20 @@ function solve(input: string, constraint: Reveal): number {
     if (isGamePossible(game, constraint)) {
       sum += game.id;
     }
+  }
+
+  return sum;
+}
+
+function solve2(lines: string[]): number {
+  let sum = 0;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i]!;
+    const game = parseGame(line, i);
+
+    const pwr = power(game);
+    sum += pwr;
   }
 
   return sum;
@@ -190,6 +225,9 @@ Game 100: 1 green, 11 red, 4 blue; 4 green, 1 red; 9 red, 2 blue; 5 blue, 11 red
     blue: 14,
   };
 
-  const result1 = solve(input, constraint);
-  console.log(`Day 1 result 1: ${result1}`);
+  const lines = input.split('\n').map((line) => line.trim());
+  const result1 = solve(lines, constraint);
+  const result2 = solve2(lines);
+  console.log(`Day 2 result 1: ${result1}`);
+  console.log(`Day 2 result 2: ${result2}`);
 }

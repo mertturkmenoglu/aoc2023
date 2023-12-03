@@ -1,70 +1,39 @@
 import { assert } from 'node:console';
 import fs from 'node:fs';
 
-function isSymbol(ch: string): boolean {
-  return ch !== '.';
+const sym = (s: string) => s !== '.';
+const num = (s: string | undefined): s is string => !!s && !isNaN(parseInt(s));
+const check = (lines: string[], i: number, j: number) => num(lines[i]?.[j]);
+const set = (lines: string[], i: number, arr: string[], s: number, e: number, idx: number) => {
+  if (num(lines[i]!.substring(s, e))) { arr[idx] = lines[i]!.substring(s, e); }
+};
+const pred = (a: (string | undefined)[]): boolean => a.some((c) => !!c && sym(c));
+
+function isAdj(l: string[], i: number, s: number, e: number): boolean {
+  return pred([l[i]?.[s - 1], l[i]?.[e]]) || [...Array(e - s + 2).keys()].map(x => x + s - 1).some(j => pred([l[i-1]?.[j], l[i+1]?.[j]]));
 }
 
-function isNumber(s: string | undefined): boolean {
-  return !!s && !isNaN(parseInt(s));
-}
-
-function isAdjacentToSymbol(lines: string[], i: number, startIndex: number, endIndex: number): boolean {
-  // Check sides
-  const pred = (a: (string | undefined)[]): boolean => a.some((ch) => !!ch && isSymbol(ch));
-  const chars = [lines[i]![startIndex - 1], lines[i]![endIndex]];
-
-  if (pred(chars)) {
-    return true;
-  }
-
-  for (let j = startIndex - 1; j < endIndex + 1; j++) {
-    const chars = [lines[i-1]?.[j], lines[i+1]?.[j]];
-    if (pred(chars)) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
-function getAdjNums(lines: string[], i: number, j: number): number[] {
-  let l = '', r = '', jj = j + 1;
-
-  while (isNumber(lines[i]?.[jj]) && j >= 0) { jj++; }
-  const prsub = lines[i]?.substring(j + 1, jj);
-  if (!!prsub && isNumber(prsub)) { r = prsub; }
-
-  jj = j - 1;
-  while (isNumber(lines[i]?.[jj])) { jj--; }
-  const plsub = lines[i]?.substring(jj + 1, j);
-  if (!!plsub && isNumber(plsub)) { l = plsub; }
-
-  const ch = lines[i]?.[j];
-  if (!!ch && isNumber(ch)) {
-    const newStr = `${l}${ch}${r}`;
-    return [+newStr];
-  }
-
-  return [l, r].filter(x => x !== '').map(x => +x);
-}
-
-function getGearRatio(lines: string[], i: number, j: number): number {
-  const adj: number[] = [];
-  let jj = 0, sub = '';
-
-  jj = j - 1;
-  while (isNumber(lines[i]![jj]) && j >= 0) { jj--; }
-  sub = lines[i]!.substring(jj + 1, j);
-  if (isNumber(sub)) { adj.push(+sub); }
-
+function getAdjNums(l: string[], i: number, j: number): number[] {
+  const s: string[] = ['', ''];
+  let jj = j - 1;
+  while (check(l, i, jj)) { jj--; }
+  set(l, i, s, jj + 1, j, 0);
   jj = j + 1;
-  while (isNumber(lines[i]![jj])) { jj++ }
-  sub = lines[i]!.substring(j + 1, jj);
-  if (isNumber(sub)) { adj.push(+sub); }
+  while (check(l, i, jj)) { jj++; }
+  set(l, i, s, j + 1, jj, 1);
+  return num(l[i]?.[j]) ? [+`${s[0]}${l[i]?.[j]}${s[1]}`] : s.filter(x => !!x).map(x => +x);
+}
 
-  adj.push(...getAdjNums(lines, i - 1, j), ...getAdjNums(lines, i + 1, j))
-
+function getGearRatio(l: string[], i: number, j: number): number {
+  const adj: number[] = [];
+  const pushSub = (s: number, e: number) => { if (num(l[i]?.substring(s, e))) { adj.push(+l[i]!.substring(s, e)); } };
+  let jj = j - 1;
+  while (check(l, i, jj)) { jj--; }
+  pushSub(jj + 1, j);
+  jj = j + 1;
+  while (check(l, i, jj)) { jj++; }
+  pushSub(j + 1, jj);
+  adj.push(...getAdjNums(l, i - 1, j), ...getAdjNums(l, i + 1, j))
   return adj.length === 2 ? adj[0]! * adj[1]! : -1;
 }
 
@@ -72,16 +41,10 @@ function solve1(lines: string[]): number {
   return lines.reduce((acc, line, i) => {
     let j = 0, sum = 0;
     while (j < line.length) {
-      if (isNumber(line[j]!)) {
+      if (num(line[j]!)) {
         const start = j;
-
-        while (isNumber(line[j]!)) {
-          j++;
-        }
-
-        if (isAdjacentToSymbol(lines, i, start, j)) {
-          sum += +line.substring(start, j);
-        }
+        while (num(line[j]!)) { j++; }
+        sum += isAdj(lines, i, start, j) ? +line.substring(start, j) : 0;
       }
       j++;
     }
@@ -95,11 +58,8 @@ function solve2(lines: string[]): number {
   for (let i = 0; i < lines.length; i++) {
     for (let j = 0; j < lines[i]!.length; j++) {
       if (lines[i]![j]! === '*') {
-        const gearRatio = getGearRatio(lines, i, j);
-        
-        if (gearRatio !== -1) {
-          sum += gearRatio;
-        }
+        const r = getGearRatio(lines, i, j);
+        sum += r !== -1 ? r : 0;
       }
     }
   }

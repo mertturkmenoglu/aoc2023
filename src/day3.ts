@@ -1,3 +1,4 @@
+import { assert } from 'node:console';
 import fs from 'node:fs';
 
 function isSymbol(ch: string): boolean {
@@ -10,20 +11,16 @@ function isNumber(s: string | undefined): boolean {
 
 function isAdjacentToSymbol(lines: string[], i: number, startIndex: number, endIndex: number): boolean {
   // Check sides
-  const line = lines[i]!;
-  const lch = line[startIndex - 1];
-  const rch = line[endIndex];
+  const pred = (a: (string | undefined)[]): boolean => a.some((ch) => !!ch && isSymbol(ch));
+  const chars = [lines[i]![startIndex - 1], lines[i]![endIndex]];
 
-  if ((lch && isSymbol(lch)) || (rch && isSymbol(rch)))  {
+  if (pred(chars)) {
     return true;
   }
 
-  const jStart = startIndex - 1 < 0 ? 0 : startIndex - 1;
-
-  for (let j = jStart; j < endIndex + 1; j++) {
-    const pch = lines[i-1]?.[j];
-    const nch = lines[i+1]?.[j];
-    if ((pch && isSymbol(pch)) || (nch && isSymbol(nch))) {
+  for (let j = startIndex - 1; j < endIndex + 1; j++) {
+    const chars = [lines[i-1]?.[j], lines[i+1]?.[j]];
+    if (pred(chars)) {
       return true;
     }
   }
@@ -31,121 +28,65 @@ function isAdjacentToSymbol(lines: string[], i: number, startIndex: number, endI
   return false;
 }
 
+function getAdjNums(lines: string[], i: number, j: number): number[] {
+  let l = '', r = '', jj = j + 1;
+
+  while (isNumber(lines[i]?.[jj]) && j >= 0) { jj++; }
+  const prsub = lines[i]?.substring(j + 1, jj);
+  if (!!prsub && isNumber(prsub)) { r = prsub; }
+
+  jj = j - 1;
+  while (isNumber(lines[i]?.[jj])) { jj--; }
+  const plsub = lines[i]?.substring(jj + 1, j);
+  if (!!plsub && isNumber(plsub)) { l = plsub; }
+
+  const ch = lines[i]?.[j];
+  if (!!ch && isNumber(ch)) {
+    const newStr = `${l}${ch}${r}`;
+    return [+newStr];
+  }
+
+  return [l, r].filter(x => x !== '').map(x => +x);
+}
+
 function getGearRatio(lines: string[], i: number, j: number): number {
-  const adjacentNumbers: number[] = [];
-  const line = lines[i]!;
-  let jj = 0;
-  let ii = 0;
-
-  // Check right side
-  jj = j + 1;
-  while (isNumber(line[jj])) { jj++ }
-  const rsub = line.substring(j + 1, jj);
-  if (isNumber(rsub)) { adjacentNumbers.push(+rsub); }
-
-  // Chech left side
-  jj = j - 1;
-  while (isNumber(line[jj]) && j >= 0) { jj--; }
-  const lsub = line.substring(jj + 1, j);
-  if (isNumber(lsub)) { adjacentNumbers.push(+lsub); }
-
-  let pr: string | null = null;
-  let pl: string | null = null;
-
-  // Check for previous line
-  ii = i - 1;
-  jj = j + 1;
-  while (isNumber(lines[ii]?.[jj]) && j >= 0) { jj++; }
-  const prsub = lines[ii]?.substring(j + 1, jj);
-  if (!!prsub && isNumber(prsub)) { pr = prsub; }
+  const adj: number[] = [];
+  let jj = 0, sub = '';
 
   jj = j - 1;
-  while (isNumber(lines[ii]?.[jj])) { jj--; }
-  const plsub = lines[ii]?.substring(jj + 1, j);
-  if (!!plsub && isNumber(plsub)) { pl = plsub; }
+  while (isNumber(lines[i]![jj]) && j >= 0) { jj--; }
+  sub = lines[i]!.substring(jj + 1, j);
+  if (isNumber(sub)) { adj.push(+sub); }
 
-  const topChar = lines[ii]?.[j];
-  if (!!topChar && isNumber(topChar)) {
-    const newStr = `${pl !== null ? pl : ''}${topChar}${pr !== null ? pr : ''}`;
-    adjacentNumbers.push(+newStr);
-  } else {
-    if (pl !== null) {
-      adjacentNumbers.push(+pl);
-    }
-
-    if (pr !== null) {
-      adjacentNumbers.push(+pr);
-    }
-  }
-
-  // Check for next line
-  let nr: string | null = null;
-  let nl: string | null = null;
-  ii = i + 1;
   jj = j + 1;
-  while (isNumber(lines[ii]?.[jj]) && j >= 0) { jj++; }
-  const nrsub = lines[ii]?.substring(j + 1, jj);
-  if (!!nrsub && isNumber(nrsub)) { nr = nrsub; }
+  while (isNumber(lines[i]![jj])) { jj++ }
+  sub = lines[i]!.substring(j + 1, jj);
+  if (isNumber(sub)) { adj.push(+sub); }
 
-  jj = j - 1;
-  while (isNumber(lines[ii]?.[jj])) { jj--; }
-  const nlsub = lines[ii]?.substring(jj + 1, j);
-  if (!!nlsub && isNumber(nlsub)) { nl = nlsub; }
+  adj.push(...getAdjNums(lines, i - 1, j), ...getAdjNums(lines, i + 1, j))
 
-  const botChar = lines[ii]?.[j];
-  if (!!botChar && isNumber(botChar)) {
-    const newStr = `${nl !== null ? nl : ''}${botChar}${nr !== null ? nr : ''}`;
-    adjacentNumbers.push(+newStr);
-  } else {
-    if (nl !== null) {
-      adjacentNumbers.push(+nl);
-    }
-
-    if (nr !== null) {
-      adjacentNumbers.push(+nr);
-    }
-  }
-
-  // Check if gear then return ratio else return -1
-  if (adjacentNumbers.length === 2) {
-    return adjacentNumbers[0]! * adjacentNumbers[1]!;
-  }
-
-  return -1;
+  return adj.length === 2 ? adj[0]! * adj[1]! : -1;
 }
 
 function solve1(lines: string[]): number {
-  let sum = 0;
-
-  for (let i = 0; i < lines.length; i++) {
-    let j = 0;
-    const line = lines[i]!
+  return lines.reduce((acc, line, i) => {
+    let j = 0, sum = 0;
     while (j < line.length) {
-      const ch = line[j]!;
-      const v = parseInt(ch);
+      if (isNumber(line[j]!)) {
+        const start = j;
 
-      if (isNaN(v)) {
-        j++;
-        continue;
+        while (isNumber(line[j]!)) {
+          j++;
+        }
+
+        if (isAdjacentToSymbol(lines, i, start, j)) {
+          sum += +line.substring(start, j);
+        }
       }
-
-      // Found a number index, loop until char is not a number
-      const startIndex = j;
-
-      while (isNumber(line[j]!)) {
-        j++;
-      }
-
-      const endIndex = j; // Exclusive range [startIndex, endIndex)
-      const n = +line.substring(startIndex, endIndex);
-
-      if (isAdjacentToSymbol(lines, i, startIndex, endIndex)) {
-        sum += n;
-      }
+      j++;
     }
-  }
-
-  return sum;
+    return acc + sum;
+  }, 0);
 }
 
 function solve2(lines: string[]): number {
@@ -171,4 +112,6 @@ export function day3() {
   const res = [solve1(lines), solve2(lines)];
   console.log(`Day 3 result 1: ${res[0]}`);
   console.log(`Day 3 result 2: ${res[1]}`);
+  assert(res[0] === 537732, 'part 1');
+  assert(res[1] === 84883664, 'part 2');
 }

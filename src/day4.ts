@@ -15,9 +15,7 @@ function matches([w, o]: [number[], number[]]): number {
 }
 
 function solve1(lines: string[]): number {
-  return lines.reduce((acc, line) => {
-    return acc + Math.floor(Math.pow(2, matches(parseLine(line)) - 1));
-  }, 0);
+  return lines.reduce((acc, l) => acc + Math.floor(Math.pow(2, matches(parseLine(l)) - 1)), 0);
 }
 
 function solve2(lines: string[]) {

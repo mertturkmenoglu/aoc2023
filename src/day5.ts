@@ -12,7 +12,7 @@ type TInput = {
   mappings: TMap[][];
 }
 
-function parseInput(lines: string[]): TInput {
+function getSections(lines: string[]): [seeds: string[], rest: string[][]] {
   const sections: string[][] = [];
   const tmp: string[] = [];
 
@@ -26,15 +26,30 @@ function parseInput(lines: string[]): TInput {
   }
 
   sections.push([...tmp]);
+  const [seeds, ...rest] = sections;
+  return [seeds!, rest];
+}
+
+function parseSeeds(seeds: string[]): number[] {
+  const [_, str] = seeds[0]!.split(': ');
+  return str!.split(' ').map(parseFloat);
+}
+
+function parseMapLine(s: string): TMap {
+  const [dst, src, l] = s.split(' ');
+  return { dst: +dst!, src: +src!, length: +l!, };
+}
+
+function parseMappings(mappings: string[][]): TMap[][] {
+  return mappings.map((m) => m.slice(1).map(parseMapLine));
+}
+
+function parseInput(lines: string[]): TInput {
+  const [seeds, rest] = getSections(lines);
 
   return {
-    seeds: sections[0]![0]!.split(': ')[1]!.split(' ').map((s) => +s),
-    mappings: sections.slice(1).map((m) => {
-      return m.slice(1).map((s) => {
-        const [dst, src, l] = s.split(' ');
-        return { dst: +dst!, src: +src!, length: +l!, };
-      });
-    }),
+    seeds: parseSeeds(seeds),
+    mappings: parseMappings(rest)
   };
 }
 
@@ -47,41 +62,27 @@ function getTarget(x: number, maps: TMap[]): number {
   return map ? map.dst + (x - map.src) : x;
 }
 
-let lastResult: number | null = null;
-let lastMap: TMap | undefined = undefined;
-
 function seedToLocation(seed: number, mappings: TMap[][]): number {
-  const map = getMap(seed, mappings[0]!);
-  if (map?.src === lastMap?.src && lastResult) {
-    return lastResult + 1;
-  }
-
-  const result = mappings.reduce((acc, m) => getTarget(acc, m), seed);
-  lastResult = result;
-  lastMap = map;
-  return result;
+  return mappings.reduce((acc, m) => getTarget(acc, m), seed);
 }
 
-function solve1(lines: string[]): number {
-  const { seeds, mappings } = parseInput(lines);
+function solve1({ seeds, mappings }: TInput): number {
   return Math.min(...seeds.map((seed) => seedToLocation(seed, mappings)));
 }
 
-function solve2(lines: string[]): number {
-  const { seeds, mappings } = parseInput(lines);
-  let min = -1;
+function solve2({ seeds, mappings }: TInput): number {
+  let min = Number.POSITIVE_INFINITY;
   const ranges: [number, number][] = [];
 
   for (let i = 0; i < seeds.length; i += 2) {
-    ranges.push([seeds[i]!, seeds[i + 1]!])
+    ranges.push([seeds[i]!, seeds[i + 1]!]);
   }
 
   for (const [start, len] of ranges) {
     let seed = start;
     while (seed < start + len) {
       const map = getMap(seed, mappings[0]!);
-      const loc = seedToLocation(seed, mappings);
-      min = min === -1 || loc < min ? loc : min;
+      min = Math.min(min, seedToLocation(seed, mappings));
       seed = map ? map.src + map.length : seed + len;
     }
   }
@@ -91,7 +92,8 @@ function solve2(lines: string[]): number {
 
 export function day5() {
   const lines = fs.readFileSync('src/input5.txt').toString().split('\n');
-  const res = [solve1(lines), solve2(lines)];
+  const inp = parseInput(lines);
+  const res = [solve1(inp), solve2(inp)];
   console.log(`Day 5 result 1: ${res[0]}`);
   console.log(`Day 5 result 2: ${res[1]}`);
   assert(res[0] === 322500873, 'part 1');

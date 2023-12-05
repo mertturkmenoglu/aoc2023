@@ -60,11 +60,27 @@ function solve1(lines: string[]): number {
   return min;
 }
 
-function solve2() {}
+function solve2(lines: string[]): number {
+  const { seeds, mappings } = parseInput(lines);
+  let min = -1;
+
+  for (let i = 0; i < seeds.length; i += 2) {
+    const rng = seeds.slice(i, i + 2);
+    for (let seed = rng[0]!; seed < rng[0]! + rng[1]!; seed++) {
+      let input = seed;
+      for (const m of mappings) {
+        input = getTarget(input, m);
+      }
+      min = min === -1 || input < min ? input : min;
+    }
+  }
+
+  return min;
+}
 
 export function day5() {
   const lines = fs.readFileSync('src/input5.txt').toString().split('\n');
-  const res = [solve1(lines), solve2()];
+  const res = [solve1(lines), solve2(lines)];
   console.log(`Day 5 result 1: ${res[0]}`);
   console.log(`Day 5 result 2: ${res[1]}`);
   assert(res[0] === 322500873, 'part 1');

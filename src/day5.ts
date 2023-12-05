@@ -8,7 +8,7 @@ type TMap = {
 };
 
 type TInput = {
-  seeds: number[],
+  seeds: number[];
   mappings: TMap[][];
 }
 
@@ -33,45 +33,56 @@ function parseInput(lines: string[]): TInput {
       return m.slice(1).map((s) => {
         const [dst, src, l] = s.split(' ');
         return { dst: +dst!, src: +src!, length: +l!, };
-      })
+      });
     }),
   };
 }
 
+function getMap(x: number, maps: TMap[]): TMap | undefined {
+  return maps.find((m) => x >= m.src && x <= m.src + m.length - 1);
+}
+
 function getTarget(x: number, maps: TMap[]): number {
-  const map = maps.find((m) => x >= m.src && x <= m.src + m.length - 1);
+  const map = getMap(x, maps);
   return map ? map.dst + (x - map.src) : x;
+}
+
+let lastResult: number | null = null;
+let lastMap: TMap | undefined = undefined;
+
+function seedToLocation(seed: number, mappings: TMap[][]): number {
+  const map = getMap(seed, mappings[0]!);
+  if (map?.src === lastMap?.src && lastResult) {
+    return lastResult + 1;
+  }
+
+  const result = mappings.reduce((acc, m) => getTarget(acc, m), seed);
+  lastResult = result;
+  lastMap = map;
+  return result;
 }
 
 function solve1(lines: string[]): number {
   const { seeds, mappings } = parseInput(lines);
-  let min = -1;
-
-  for (const seed of seeds) {
-    let input = seed;
-    for (const m of mappings) {
-      input = getTarget(input, m);
-    }
-    if (min === -1 || input < min) {
-      min = input;
-    }
-  }
-
-  return min;
+  return Math.min(...seeds.map((seed) => seedToLocation(seed, mappings)));
 }
 
 function solve2(lines: string[]): number {
   const { seeds, mappings } = parseInput(lines);
   let min = -1;
+  const ranges: [number, number][] = [];
 
   for (let i = 0; i < seeds.length; i += 2) {
-    const rng = seeds.slice(i, i + 2);
-    for (let seed = rng[0]!; seed < rng[0]! + rng[1]!; seed++) {
-      let input = seed;
-      for (const m of mappings) {
-        input = getTarget(input, m);
-      }
-      min = min === -1 || input < min ? input : min;
+    ranges.push([seeds[i]!, seeds[i + 1]!])
+  }
+
+  for (const [start, len] of ranges) {
+    let seed = start;
+    while (seed < start + len) {
+      const map = getMap(seed, mappings[0]!);
+      const loc = seedToLocation(seed, mappings);
+      min = min === -1 || loc < min ? loc : min;
+      seed = map ? map.src + map.length : seed + len;
     }
   }
 
@@ -84,4 +95,5 @@ export function day5() {
   console.log(`Day 5 result 1: ${res[0]}`);
   console.log(`Day 5 result 2: ${res[1]}`);
   assert(res[0] === 322500873, 'part 1');
+  assert(res[1] === 108956227, 'part 2');
 }

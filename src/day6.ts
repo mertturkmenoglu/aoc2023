@@ -9,25 +9,16 @@ type Race = {
 type TInput = Race[];
 
 function parseTimeAndDistance(lines: string[]): [string[], string[]] {
-  const [_a, timeNumbersStr] = lines[0]!.split(':').map(x => x.trim());
-  const [_b, distanceNumbersStr] = lines[1]!.split(":").map(x => x.trim());
-  const timeNumbers = timeNumbersStr!.split(' ').map(x => x.trim()).filter(x => x !== '');
-  const distanceNumbers = distanceNumbersStr!.split(' ').map(x => x.trim()).filter(x => x !== '');
-  return [timeNumbers, distanceNumbers];
+  const [t, d] = lines.map((l) => l.split(':').map(x => x.trim())[1]!.split(' ').map(x => x.trim()).filter(x => x !== ''));
+  return [t!, d!];
 }
 
 function parseInput(lines: string[]): TInput {
   const [times, distances] = parseTimeAndDistance(lines);
-  const races = [];
-
-  for (let i = 0; i < times.length; i++) {
-    races.push({
-      time: +times[i]!,
-      distance: +distances[i]!,
-    });
-  }
-
-  return races;
+  return new Array(times.length).fill(0).map((_, i) => ({
+    time: +times[i]!,
+    distance: +distances[i]!,
+  }));
 }
 
 function parseInput2(lines: string[]): TInput {

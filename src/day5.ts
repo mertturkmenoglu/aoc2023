@@ -1,6 +1,3 @@
-import { assert } from 'node:console';
-import fs from 'node:fs';
-
 type TMap = {
   dst: number;
   src: number;
@@ -66,11 +63,15 @@ function seedToLocation(seed: number, mappings: TMap[][]): number {
   return mappings.reduce((acc, m) => getTarget(acc, m), seed);
 }
 
-function solve1({ seeds, mappings }: TInput): number {
+export const expected1 = 322500873;
+export function solve1(lines: string[]): number {
+  const { seeds, mappings } = parseInput(lines);
   return Math.min(...seeds.map((seed) => seedToLocation(seed, mappings)));
 }
 
-function solve2({ seeds, mappings }: TInput): number {
+export const expected2 = 108956227;
+export function solve2(lines: string[]): number {
+  const { seeds, mappings } = parseInput(lines);
   let min = Number.POSITIVE_INFINITY;
   const ranges: [number, number][] = [];
 
@@ -88,14 +89,4 @@ function solve2({ seeds, mappings }: TInput): number {
   }
 
   return min;
-}
-
-export function day5() {
-  const lines = fs.readFileSync('src/input5.txt').toString().split('\n');
-  const inp = parseInput(lines);
-  const res = [solve1(inp), solve2(inp)];
-  console.log(`Day 5 result 1: ${res[0]}`);
-  console.log(`Day 5 result 2: ${res[1]}`);
-  assert(res[0] === 322500873, 'part 1');
-  assert(res[1] === 108956227, 'part 2');
 }

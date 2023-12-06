@@ -1,6 +1,3 @@
-import { assert } from 'node:console';
-import fs from 'node:fs';
-
 type Race = {
   time: number;
   distance: number;
@@ -38,21 +35,14 @@ function winningCount(race: Race): number {
   return counter;
 }
 
-function solve1(lines: string[]): number {
+export const expected1 = 440000;
+export function solve1(lines: string[]): number {
   const races = parseInput(lines);
   return races.reduce((acc, race) => acc * winningCount(race), 1);
 }
 
-function solve2(lines: string[]): number {
+export const expected2 = 26187338;
+export function solve2(lines: string[]): number {
   const races = parseInput2(lines);
   return winningCount(races[0]!);
-}
-
-export function day6() {
-  const lines = fs.readFileSync('src/input6.txt').toString().split('\n');
-  const res = [solve1(lines), solve2(lines)];
-  console.log(`Day 6 result 1: ${res[0]}`);
-  console.log(`Day 6 result 2: ${res[1]}`);
-  assert(res[0] === 440000, 'part 1');
-  assert(res[1] === 26187338, 'part 2');
 }

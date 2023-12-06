@@ -1,6 +1,3 @@
-import { assert } from 'node:console';
-import fs from 'node:fs';
-
 const sym = (s: string) => s !== '.';
 const num = (s: string | undefined): s is string => !!s && !isNaN(parseInt(s));
 const check = (lines: string[], i: number, j: number) => num(lines[i]?.[j]);
@@ -37,7 +34,8 @@ function getGearRatio(l: string[], i: number, j: number): number {
   return adj.length === 2 ? adj[0]! * adj[1]! : -1;
 }
 
-function solve1(lines: string[]): number {
+export const expected1 = 537732;
+export function solve1(lines: string[]): number {
   return lines.reduce((acc, line, i) => {
     let j = 0, sum = 0;
     while (j < line.length) {
@@ -52,7 +50,8 @@ function solve1(lines: string[]): number {
   }, 0);
 }
 
-function solve2(lines: string[]): number {
+export const expected2 = 84883664;
+export function solve2(lines: string[]): number {
   let sum = 0;
 
   for (let i = 0; i < lines.length; i++) {
@@ -65,13 +64,4 @@ function solve2(lines: string[]): number {
   }
 
   return sum;
-}
-
-export function day3() {
-  const lines = fs.readFileSync('src/input3.txt').toString().split('\n');
-  const res = [solve1(lines), solve2(lines)];
-  console.log(`Day 3 result 1: ${res[0]}`);
-  console.log(`Day 3 result 2: ${res[1]}`);
-  assert(res[0] === 537732, 'part 1');
-  assert(res[1] === 84883664, 'part 2');
 }

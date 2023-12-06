@@ -1,5 +1,3 @@
-import fs from 'node:fs';
-
 type Game = {
   id: number;
   reveals: Reveal[];
@@ -89,7 +87,13 @@ function power(game: Game): number {
   return minRed * minGreen * minBlue;
 }
 
-function solve1(lines: string[], constraint: Reveal): number {
+export const expected1 = 2545;
+export function solve1(lines: string[]): number {
+  const constraint: Reveal = {
+    red: 12,
+    green: 13,
+    blue: 14,
+  };
   let sum = 0;
 
   for (let i = 0; i < lines.length; i++) {
@@ -106,7 +110,8 @@ function solve1(lines: string[], constraint: Reveal): number {
   return sum;
 }
 
-function solve2(lines: string[]): number {
+export const expected2 = 78111;
+export function solve2(lines: string[]): number {
   let sum = 0;
 
   for (let i = 0; i < lines.length; i++) {
@@ -118,17 +123,4 @@ function solve2(lines: string[]): number {
   }
 
   return sum;
-}
-
-export function day2() {
-  const lines = fs.readFileSync('src/input2.txt').toString().split('\n');
-  const constraint: Reveal = {
-    red: 12,
-    green: 13,
-    blue: 14,
-  };
-
-  const res = [solve1(lines, constraint), solve2(lines)];
-  console.log(`Day 2 result 1: ${res[0]}`);
-  console.log(`Day 2 result 2: ${res[1]}`);
 }

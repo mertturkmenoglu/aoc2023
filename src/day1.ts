@@ -1,6 +1,10 @@
-import fs from 'node:fs';
+type NumPos = {
+  num: number;
+  pos: number;
+};
 
-function solve1(lines: string[]): number {
+export const expected1 = 54697;
+export function solve1(lines: string[]): number {
   let sum = 0;
 
   for (const line of lines) {
@@ -29,12 +33,8 @@ function solve1(lines: string[]): number {
   return sum;
 }
 
-type NumPos = {
-  num: number;
-  pos: number;
-}
-
-function solve2(lines: string[]): number {
+export const expected2 = 54885;
+export function solve2(lines: string[]): number {
   const numsAsString = ['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'];
   let sum = 0;
 
@@ -78,11 +78,4 @@ function solve2(lines: string[]): number {
   }
 
   return sum;
-}
-
-export function day1() {
-  const lines = fs.readFileSync('src/input1.txt').toString().split('\n');
-  const res = [solve1(lines), solve2(lines)];
-  console.log(`Day 1 result 1: ${res[0]}`);
-  console.log(`Day 1 result 2: ${res[1]}`);
 }

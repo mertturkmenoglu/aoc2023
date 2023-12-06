@@ -29,6 +29,22 @@ function parseInput(lines: string[]): TInput {
   };
 }
 
+function parseInput2(lines: string[]): TInput {
+  const [_a, timeNumbersStr] = lines[0]!.split(':').map(x => x.trim());
+  const [_b, distanceNumbersStr] = lines[1]!.split(":").map(x => x.trim());
+  const timeNumber = timeNumbersStr!.split(' ').map(x => x.trim()).filter(x => x !== '').join('');
+  const distanceNumber = distanceNumbersStr!.split(' ').map(x => x.trim()).filter(x => x !== '').join('');
+
+  return {
+    races: [
+      {
+        time: +timeNumber,
+        distance: +distanceNumber,
+      },
+    ],
+  };
+}
+
 function waysOfRace(race: Race): number {
   let counter = 0;
 
@@ -44,7 +60,7 @@ function waysOfRace(race: Race): number {
   return counter;
 }
 
-function solve1(lines: string[]): number{
+function solve1(lines: string[]): number {
   const { races } = parseInput(lines);
   let prod = 1;
 
@@ -56,8 +72,10 @@ function solve1(lines: string[]): number{
   return prod;
 }
 
-function solve2(lines: string[]): number{
-  return lines.length;
+function solve2(lines: string[]): number {
+  const { races } = parseInput2(lines);
+  console.log(races)
+  return waysOfRace(races[0]!);
 }
 
 export function day6() {

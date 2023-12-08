@@ -17,47 +17,65 @@ function parseInstructions(s: string): TDirection[] {
 
 function parseNetwork(lines: string[]): TNode[] {
   return lines.map((line) => {
-    const [valStr, mapVal] = line.split("=").map(x => x.trim());
-    const [leftVal, rightVal] = mapVal!.split("").slice(1, mapVal!.length - 1).join("").split(",").map(x => x.trim());
-
-    return {
-      value: valStr!,
-      left: leftVal!,
-      right: rightVal!,
-    }
+    const [value, rest] = line.split("=").map(x => x.trim()) as [string, string];
+    const [left, right] = rest!.split("").slice(1, rest!.length - 1).join("").split(",").map(x => x.trim()) as [string, string];
+    return { value, left, right };
   });
 }
 
 function parseInput(lines: string[]): TInput {
-  const [instructionsLine, _emptyLine, ...rest] = lines;
-
+  const [instructionsLine, _, ...rest] = lines;
   return {
     instructions: parseInstructions(instructionsLine!),
     network: parseNetwork(rest),
   };
 }
 
-export const expected1 = 0;
-export function solve1(lines: string[]): number {
-  const { instructions, network } = parseInput(lines);
-  let steps = 1;
-  let i = 0;
-  let instructionIndex = 0;
-  let curr = network[i]!;
-  let instruction = instructions[instructionIndex]!;
+function gcd(a: number, b: number): number { 
+  let temp = b;
 
-  while (curr.value !== "ZZZ") {
-    const next = instruction === "L" ? curr.left : curr.right;
+  while (b !== 0) {
+    b = a % b;
+    a = temp;
+    temp = b;
+  }
+  
+  return a; 
+} 
+  
+function lcm(a: number, b: number): number { 
+  return (a * b) / gcd(a, b); 
+}
+
+function findSteps(pos: TNode, { instructions, network }: TInput, s: number): number {
+  let steps = 0;
+  let i = network.findIndex((v) => v.value === pos.value);
+  let ii = 0;
+  let curr = network[i]!;
+  let ins = instructions[ii]!;
+
+  while (!curr.value.endsWith(s === 1 ? "ZZZ" : "Z")) {
+    const next = ins === "L" ? curr.left : curr.right;
     i = network.findIndex((v) => v.value === next);
     curr = network[i]!
-    instructionIndex = (instructionIndex + 1) % instructions.length;
-    instruction = instructions[instructionIndex]!;
+    ii = (ii + 1) % instructions.length;
+    ins = instructions[ii]!;
     steps++;
   }
 
-  return steps - 1;
+  return steps;
 }
 
+export const expected1 = 13019;
+export function solve1(lines: string[]): number {
+  const input = parseInput(lines);
+  return findSteps(input.network[0]!, input, 1);
+}
+
+export const expected2 = 13_524_038_372_771;
 export function solve2(lines: string[]): number {
-  return lines.length;
+  const input = parseInput(lines);
+  return input.network.filter((v) => v.value.endsWith("A"))
+    .map((p) => findSteps(p, input, 2))
+    .reduce((acc, x) => lcm(acc, x));
 }

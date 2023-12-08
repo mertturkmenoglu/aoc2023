@@ -9,6 +9,8 @@ type TInput = {
   network: TNode[];
 };
 
+let inp: TInput | null = null;
+
 function parseNetwork(lines: string[]): TNode[] {
   return lines.map((line) => {
     const [value, rest] = line.split("=").map(x => x.trim()) as [string, string];
@@ -18,11 +20,14 @@ function parseNetwork(lines: string[]): TNode[] {
 }
 
 function parseInput(lines: string[]): TInput {
-  const [instructionsLine, _, ...rest] = lines;
-  return {
-    instructions: instructionsLine!.split(""),
-    network: parseNetwork(rest),
-  };
+  if (!inp) {
+    const [instructionsLine, _, ...rest] = lines;
+    inp = {
+      instructions: instructionsLine!.split(""),
+      network: parseNetwork(rest).sort((a, b) => a.value.localeCompare(b.value)),
+    };
+  }
+  return inp;
 }
 
 function gcd(a: number, b: number): number { 
@@ -41,13 +46,34 @@ function lcm(a: number, b: number): number {
   return (a * b) / gcd(a, b); 
 }
 
+function find(network: TNode[], next: string): TNode {
+  let lo = 0;
+  let hi = network.length;
+
+  while (lo < hi) {
+    const m = Math.floor(lo + (hi - lo) / 2);
+    const v = network[m]!;
+    const cmp = next.localeCompare(v.value);
+
+    if (cmp === 0) {
+      return v;
+    } else if (cmp === -1) {
+      hi = m;
+    } else {
+      lo = m + 1;
+    }
+  }
+
+  throw new Error("Cannot find element");
+}
+
 function findSteps(pos: TNode, { instructions, network }: TInput, sol: number): number {
   let steps = 0, i = 0, curr = pos, ins = instructions[i]!;
   const token = sol === 1 ? "ZZZ" : "Z"
 
   while (!curr.value.endsWith(token)) {
     const next = ins === "L" ? curr.left : curr.right;
-    curr = network.find((v) => v.value === next)!;
+    curr = find(network, next);
     i = (i + 1) % instructions.length;
     ins = instructions[i]!;
     steps++;

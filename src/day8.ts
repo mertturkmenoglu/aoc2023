@@ -12,7 +12,7 @@ type TInput = {
 function parseNetwork(lines: string[]): TNode[] {
   return lines.map((line) => {
     const [value, rest] = line.split("=").map(x => x.trim()) as [string, string];
-    const [left, right] = rest!.split("").slice(1, rest!.length - 1).join("").split(",").map(x => x.trim()) as [string, string];
+    const [left, right] = rest.substring(1, rest.length - 1).split(",").map(x => x.trim()) as [string, string];
     return { value, left, right };
   });
 }
@@ -42,18 +42,14 @@ function lcm(a: number, b: number): number {
 }
 
 function findSteps(pos: TNode, { instructions, network }: TInput, sol: number): number {
-  let steps = 0;
-  let i = network.findIndex((v) => v.value === pos.value);
-  let ii = 0;
-  let curr = network[i]!;
-  let ins = instructions[ii]!;
+  let steps = 0, i = 0, curr = pos, ins = instructions[i]!;
+  const token = sol === 1 ? "ZZZ" : "Z"
 
-  while (!curr.value.endsWith(sol === 1 ? "ZZZ" : "Z")) {
+  while (!curr.value.endsWith(token)) {
     const next = ins === "L" ? curr.left : curr.right;
-    i = network.findIndex((v) => v.value === next);
-    curr = network[i]!
-    ii = (ii + 1) % instructions.length;
-    ins = instructions[ii]!;
+    curr = network.find((v) => v.value === next)!;
+    i = (i + 1) % instructions.length;
+    ins = instructions[i]!;
     steps++;
   }
 

@@ -1,5 +1,3 @@
-type TDirection = "L" | "R";
-
 type TNode = {
   value: string;
   left: string;
@@ -7,13 +5,9 @@ type TNode = {
 };
 
 type TInput = {
-  instructions: TDirection[];
+  instructions: string[];
   network: TNode[];
 };
-
-function parseInstructions(s: string): TDirection[] {
-  return s.trim().split("").map(x => x === "L" ? "L" : "R");
-}
 
 function parseNetwork(lines: string[]): TNode[] {
   return lines.map((line) => {
@@ -26,7 +20,7 @@ function parseNetwork(lines: string[]): TNode[] {
 function parseInput(lines: string[]): TInput {
   const [instructionsLine, _, ...rest] = lines;
   return {
-    instructions: parseInstructions(instructionsLine!),
+    instructions: instructionsLine!.split(""),
     network: parseNetwork(rest),
   };
 }
@@ -47,14 +41,14 @@ function lcm(a: number, b: number): number {
   return (a * b) / gcd(a, b); 
 }
 
-function findSteps(pos: TNode, { instructions, network }: TInput, s: number): number {
+function findSteps(pos: TNode, { instructions, network }: TInput, sol: number): number {
   let steps = 0;
   let i = network.findIndex((v) => v.value === pos.value);
   let ii = 0;
   let curr = network[i]!;
   let ins = instructions[ii]!;
 
-  while (!curr.value.endsWith(s === 1 ? "ZZZ" : "Z")) {
+  while (!curr.value.endsWith(sol === 1 ? "ZZZ" : "Z")) {
     const next = ins === "L" ? curr.left : curr.right;
     i = network.findIndex((v) => v.value === next);
     curr = network[i]!

@@ -8,41 +8,30 @@ function parseInput(lines: string[]): number[][] {
 }
 
 function diff(arr: number[]): number[] {
-  const res: number[] = [];
-
-  for (let i = 1; i < arr.length; i++) {
-    res.push(arr[i]! - arr[i-1]!);
-  }
-
-  return res;
+  return new Array(arr.length).fill(0).map((_, i) => i).slice(1).map(i => arr[i]! - arr[i - 1]!);
 }
 
-function nextValue(history: number[]): number {
-  const list: number[] = [history[history.length - 1]!];
-  let tmp: number[] = diff(history);
+function steps(history: number[], type: 'next' | 'prev'): number[] {
+  const i = type === 'next' ? -1 : 0;
+  const list = [history.at(i)!];
+  let tmp = diff(history);
 
   while (!tmp.every(x => x === 0)) {
-    list.push(tmp[tmp.length - 1]!);
+    list.push(tmp.at(i)!);
     tmp = diff(tmp);
   }
 
+  return list;
+}
+
+function nextValue(history: number[]): number {
+  const list = steps(history, 'next');
   return list.reduce((acc, x) => acc + x, 0);
 }
 
 function prevValue(history: number[]): number {
-  const list: number[] = [history[0]!];
-  let tmp = diff(history), prev = 0;
-
-  while (!tmp.every(x => x === 0)) {
-    list.push(tmp[0]!);
-    tmp = diff(tmp);
-  }
-
-  for (let i = list.length - 1; i >= 0; i--) {
-    prev = list[i]! - prev;
-  }
-
-  return prev;
+  const list = steps(history, 'prev');
+  return new Array(list.length).fill(0).map((_, i, arr) => arr.length - i - 1).reduce((acc, i) => list[i]! - acc, 0);
 }
 
 export const expected1 = 1_995_001_648;

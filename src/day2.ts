@@ -9,66 +9,31 @@ type Reveal = {
   blue: number;
 };
 
-function parseGame(line: string, i: number): Game {
+function parseGame(line: string): Game {
   const [gameStr, rest] = line.split(':');
-
-  if (!gameStr || !rest) {
-    throw Error(`Invalid format for line ${i + 1}`);
-  }
-
-  const [_, idStr] = gameStr.split(' ');
-
-  if (!idStr) {
-    throw Error(`Invalid game id format for line ${i + 1}`);
-  }
-
-  const reveals: Reveal[] = [];
-  const revs = rest.split(';');
-
-  for (const rev of revs) {
-    const parsedReveal: Reveal = {
-      red: 0,
-      green: 0,
-      blue: 0,
-    };
-
-    const sections = rev.trim().split(', ');
-
-    for (const sec of sections) {
-      const [numStr, color] = sec.split(' ');
-      if (!numStr || !color) {
-        throw Error(`Invalid format for line ${i + 1}: Cannot parse sections`);
-      }
-      if (color === 'red' || color === 'green' || color === 'blue') {
-        parsedReveal[color] = +numStr;
-      } else {
-        throw Error(`Invalid color at line ${i + 1}: Got ${color}`);
-      }
-    }
-
-    reveals.push(parsedReveal);
-  }
-
   return {
-    id: +idStr,
-    reveals: reveals,
+    id: +gameStr!.split(' ')[1]!,
+    reveals: rest!.split(';').map((rev) => {
+      const parsedReveal: Reveal = { red: 0, green: 0, blue: 0 };
+
+      for (const sec of rev.trim().split(', ')) {
+        const [numStr, color] = sec.split(' ');
+        if (color === 'red' || color === 'green' || color === 'blue') {
+          parsedReveal[color] = +numStr!;
+        }
+      }
+
+      return parsedReveal;
+    }),
   };
 }
 
 function isGamePossible(game: Game, c: Reveal): boolean {
-  for (const r of game.reveals) {
-    if (r.red > c.red || r.green > c.green || r.blue > c.blue) {
-      return false;
-    }
-  }
-
-  return true;
+  return !game.reveals.some((r) => r.red > c.red || r.green > c.green || r.blue > c.blue);
 }
 
 function power(game: Game): number {
-  let minRed = 1;
-  let minGreen = 1;
-  let minBlue = 1;
+  let minRed = 1, minGreen = 1, minBlue = 1;
 
   for (const r of game.reveals) {
     if (r.red > minRed) {
@@ -89,38 +54,11 @@ function power(game: Game): number {
 
 export const expected1 = 2545;
 export function solve1(lines: string[]): number {
-  const constraint: Reveal = {
-    red: 12,
-    green: 13,
-    blue: 14,
-  };
-  let sum = 0;
-
-  for (let i = 0; i < lines.length; i++) {
-    // Parse game
-    const line = lines[i]!;
-    const game = parseGame(line, i);
-
-    // Check if this game is possible
-    if (isGamePossible(game, constraint)) {
-      sum += game.id;
-    }
-  }
-
-  return sum;
+  const constraint: Reveal = { red: 12, green: 13, blue: 14 };
+  return lines.map(parseGame).reduce((acc, g) => acc + (isGamePossible(g, constraint) ? g.id : 0), 0)
 }
 
 export const expected2 = 78111;
 export function solve2(lines: string[]): number {
-  let sum = 0;
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i]!;
-    const game = parseGame(line, i);
-
-    const pwr = power(game);
-    sum += pwr;
-  }
-
-  return sum;
+  return lines.map((l) => power(parseGame(l))).reduce((acc, x) => acc + x, 0);
 }

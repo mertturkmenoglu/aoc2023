@@ -1,5 +1,10 @@
+let input: number[][] | null = null;
+
 function parseInput(lines: string[]): number[][] {
-  return lines.map((line) => line.trim().split(' ').map(x => +x.trim()));
+  if (!input) {
+    input = lines.map((line) => line.trim().split(' ').map(x => +x.trim()));
+  }
+  return input;
 }
 
 function diff(arr: number[]): number[] {

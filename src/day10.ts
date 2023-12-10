@@ -42,50 +42,20 @@ function pkey(pos: Pos): string {
 function getSurroundings(mtr: string[][], pos: Pos): Pos[] {
   const res: Pos[] = [];
   const curr = mtr[pos[0]]![pos[1]]!;
-  const north = mtr[pos[0] - 1]?.[pos[1]];
-  const west = mtr[pos[0]]![pos[1] - 1];
-  const south = mtr[pos[0] + 1]?.[pos[1]];
-  const east = mtr[pos[0]]![pos[1] + 1];
 
-  if (isPipeChar(north)) {
-    
-    
-    const p: Pos = [pos[0] - 1, pos[1]];
-    if (toNorth.includes(curr) && northChars.includes(north) && !visited.has(pkey(p))) {
+  const x: [string | undefined, Pos, string[], string[]][] = [
+    [ mtr[pos[0] - 1]?.[pos[1]], [pos[0] - 1, pos[1]], toNorth, northChars ],
+    [ mtr[pos[0]]![pos[1] - 1] , [pos[0], pos[1] - 1], toWest , westChars  ],
+    [ mtr[pos[0] + 1]?.[pos[1]], [pos[0] + 1, pos[1]], toSouth, southChars ],
+    [ mtr[pos[0]]![pos[1] + 1] , [pos[0], pos[1] + 1], toEast , eastChars  ],
+  ];
+
+  x.forEach(([el, p, to, chars]) => {
+    if (isPipeChar(el) && to.includes(curr) && chars.includes(el) && !visited.has(pkey(p))) {
       visited.set(pkey(p), true);
       res.push(p);
     }
-  }
-
-  if (isPipeChar(west)) {
-    
-    
-    const p: Pos = [pos[0], pos[1] - 1];
-    if (toWest.includes(curr) && westChars.includes(west) && !visited.has(pkey(p))) {
-      visited.set(pkey(p), true);
-      res.push(p);
-    }
-  }
-
-  if (isPipeChar(south)) {
-    
-    
-    const p: Pos = [pos[0] + 1, pos[1]];
-    if (toSouth.includes(curr) && southChars.includes(south) && !visited.has(pkey(p))) {
-      visited.set(pkey(p), true);
-      res.push(p);
-    }
-  }
-
-  if (isPipeChar(east)) {
-    
-    
-    const p: Pos = [pos[0], pos[1] + 1];
-    if (toEast.includes(curr) && eastChars.includes(east) && !visited.has(pkey(p))) {
-      visited.set(pkey(p), true);
-      res.push(p);
-    }
-  }
+  });
 
   return res;
 }
@@ -164,13 +134,7 @@ function enclosed(mtr: string[][], path: Path): number {
 }
 
 function isInPath(path: Path, pos: Pos): boolean {
-  for (const p of path) {
-    if (p[0] === pos[0] && p[1] === pos[1]) {
-      return true;
-    }
-  }
-
-  return false;
+  return path.some((p) => p[0] === pos[0] && p[1] === pos[1]);
 }
 
 export const expected1 = 6942;

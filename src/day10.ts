@@ -2,6 +2,9 @@ type Pos = [number, number];
 type Path = Pos[];
 
 let visited = new Map<string, boolean>();
+let pathMap: Map<string, boolean> | null = null;
+const gPaths: Path[] = [];
+let gMtr: string[][] | null = null;
 
 const pipeChars = ["|", "-", "L", "J", "7", "F", "S"] as const;
 type PipeChar = typeof pipeChars[number];
@@ -20,7 +23,11 @@ function isPipeChar(ch: string | undefined): ch is PipeChar {
 }
 
 function parseInput(lines: string[]): string[][] {
-  return lines.map(line => line.split(""));
+  if (gMtr) {
+    return gMtr;
+  }
+  gMtr = lines.map(line => line.split(""));
+  return gMtr;
 }
 
 function getStartPosition(mtr: string[][]): Pos {
@@ -35,7 +42,7 @@ function getStartPosition(mtr: string[][]): Pos {
   throw new Error("Cannot find the starting position");
 }
 
-function pkey(pos: Pos): string {
+function posKey(pos: Pos): string {
   return `${pos[0]},${pos[1]}`;
 }
 
@@ -43,17 +50,17 @@ function getSurroundings(mtr: string[][], pos: Pos): Pos[] {
   const res: Pos[] = [];
   const curr = mtr[pos[0]]![pos[1]]!;
 
-  const x: [string | undefined, Pos, string[], string[]][] = [
+  const surr: [string | undefined, Pos, string[], string[]][] = [
     [ mtr[pos[0] - 1]?.[pos[1]], [pos[0] - 1, pos[1]], toNorth, northChars ],
     [ mtr[pos[0]]![pos[1] - 1] , [pos[0], pos[1] - 1], toWest , westChars  ],
     [ mtr[pos[0] + 1]?.[pos[1]], [pos[0] + 1, pos[1]], toSouth, southChars ],
     [ mtr[pos[0]]![pos[1] + 1] , [pos[0], pos[1] + 1], toEast , eastChars  ],
   ];
 
-  x.forEach(([el, p, to, chars]) => {
-    if (isPipeChar(el) && to.includes(curr) && chars.includes(el) && !visited.has(pkey(p))) {
-      visited.set(pkey(p), true);
-      res.push(p);
+  surr.forEach(([el, pos, toChars, chars]) => {
+    if (isPipeChar(el) && toChars.includes(curr) && chars.includes(el) && !visited.has(posKey(pos))) {
+      visited.set(posKey(pos), true);
+      res.push(pos);
     }
   });
 
@@ -65,37 +72,45 @@ function charAt(mtr: string[][], pos: Pos): string {
 }
 
 function findPaths(mtr: string[][]): Path[] {
-  const paths: Path[] = [];
+  if (gPaths.length !== 0) {
+    return gPaths;
+  }
+
   const startPos = getStartPosition(mtr);
-  visited.set(pkey(startPos), true);
+  visited.set(posKey(startPos), true);
   const surr = getSurroundings(mtr, startPos);
 
   for (const p of surr) {
     const path: Path = [p];
     let flag = true;
     let newPos = p;
-    visited.set(pkey(p), true);
+    visited.set(posKey(p), true);
 
     while (flag) {
       const surroundings = getSurroundings(mtr, newPos);
-      if (surroundings.filter(x => charAt(mtr, x) !== "S").length === 0) {
-        flag = false;
-      } else {
-        newPos = surroundings.filter(x => charAt(mtr, x) !== "S")[0]!;
-        if (mtr[newPos[0]]![newPos[1]]! === "S") {
-          flag = false;
-        } else {
-          path.push(newPos);
-          visited.set(pkey(newPos), true);
-        }
+      const filtered = surroundings.filter(x => charAt(mtr, x) !== "S");
+      if (filtered.length === 0) {
+        break;
+      } 
+    
+      newPos = filtered[0]!;
+      if (mtr[newPos[0]]![newPos[1]]! === "S") {
+        break;
       }
-    }
 
-    paths.push(path);
+      path.push(newPos);
+      visited.set(posKey(newPos), true);
+  }
+
+    gPaths.push(path);
     visited.clear();
   }
 
-  return paths;
+  return gPaths;
+}
+
+function getPathsFromInput(lines: string[]): Path[] {
+  return findPaths(parseInput(lines));
 }
 
 // Scanline algorithm
@@ -111,15 +126,14 @@ function enclosed(mtr: string[][], path: Path): number {
       
       if (isInPath(path, pos)) {
         const ch = charAt(mtr, pos);
+        const isRegionChange = (ch === "J" && last === "F") || (ch === "7" && last === "L");
+        const isRegionStart = ch === "F" || ch === "L";
         if (ch === "|") {
           inRegion = !inRegion;
-        } else if (ch === "J" && last === "F") {
+        } else if (isRegionChange) {
           last = null;
           inRegion = !inRegion;
-        } else if (ch === "7" && last === "L") {
-          last = null;
-          inRegion = !inRegion;
-        } else if (ch === "F" || ch === "L") {
+        } else if (isRegionStart) {
           last = ch;
         }
       } else { 
@@ -134,13 +148,19 @@ function enclosed(mtr: string[][], path: Path): number {
 }
 
 function isInPath(path: Path, pos: Pos): boolean {
-  return path.some((p) => p[0] === pos[0] && p[1] === pos[1]);
+  if (!pathMap) {
+    pathMap = new Map<string, boolean>();
+    for (const p of path) {
+      pathMap.set(posKey(p), true);
+    }
+  }
+
+  return pathMap.get(posKey(pos)) ?? false;
 }
 
 export const expected1 = 6942;
 export function solve1(lines: string[]): number {
-  const mtr = parseInput(lines);
-  const paths = findPaths(mtr);
+  const paths = getPathsFromInput(lines);
   return (Math.max(...paths.map(p => p.length)) + 1) / 2;
 }
 

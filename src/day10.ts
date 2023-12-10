@@ -6,6 +6,15 @@ let visited = new Map<string, boolean>();
 const pipeChars = ["|", "-", "L", "J", "7", "F", "S"] as const;
 type PipeChar = typeof pipeChars[number];
 
+const toNorth = ["|", "L", "J", "S"];
+const toWest = ["-", "J", "7", "S"];
+const toSouth = ["|", "7", "F", "S"];
+const toEast = ["-", "L", "F", "S"];
+const northChars = ["|", "7", "F", "S"];
+const westChars = ["-", "L", "F", "S"];
+const southChars = ["|", "L", "J", "S"];
+const eastChars = ["-", "J", "7", "S"];
+
 function isPipeChar(ch: string | undefined): ch is PipeChar {
   return pipeChars.indexOf(ch as PipeChar) !== -1;
 }
@@ -39,40 +48,40 @@ function getSurroundings(mtr: string[][], pos: Pos): Pos[] {
   const east = mtr[pos[0]]![pos[1] + 1];
 
   if (isPipeChar(north)) {
-    const toNorth = ["|",  "L", "J", "S"];
-    const continueChars = ["|", "7", "F", "S"];
+    
+    
     const p: Pos = [pos[0] - 1, pos[1]];
-    if (toNorth.includes(curr) && continueChars.includes(north) && !visited.has(pkey(p))) {
+    if (toNorth.includes(curr) && northChars.includes(north) && !visited.has(pkey(p))) {
       visited.set(pkey(p), true);
       res.push(p);
     }
   }
 
   if (isPipeChar(west)) {
-    const toWest = ["-", "J", "7", "S"]
-    const continueChars = ["-", "L", "F", "S"];
+    
+    
     const p: Pos = [pos[0], pos[1] - 1];
-    if (toWest.includes(curr) && continueChars.includes(west) && !visited.has(pkey(p))) {
+    if (toWest.includes(curr) && westChars.includes(west) && !visited.has(pkey(p))) {
       visited.set(pkey(p), true);
       res.push(p);
     }
   }
 
   if (isPipeChar(south)) {
-    const toSouth = ["|", "7", "F", "S"];
-    const continueChars = ["|", "L", "J", "S"];
+    
+    
     const p: Pos = [pos[0] + 1, pos[1]];
-    if (toSouth.includes(curr) && continueChars.includes(south) && !visited.has(pkey(p))) {
+    if (toSouth.includes(curr) && southChars.includes(south) && !visited.has(pkey(p))) {
       visited.set(pkey(p), true);
       res.push(p);
     }
   }
 
   if (isPipeChar(east)) {
-    const toEast = ["-", "L", "F", "S"];
-    const continueChars = ["-", "J", "7", "S"];
+    
+    
     const p: Pos = [pos[0], pos[1] + 1];
-    if (toEast.includes(curr) && continueChars.includes(east) && !visited.has(pkey(p))) {
+    if (toEast.includes(curr) && eastChars.includes(east) && !visited.has(pkey(p))) {
       visited.set(pkey(p), true);
       res.push(p);
     }
@@ -119,14 +128,64 @@ function findPaths(mtr: string[][]): Path[] {
   return paths;
 }
 
-export const expected1 = 0;
+// Scanline algorithm
+// https://en.wikipedia.org/wiki/Scanline_rendering
+function enclosed(mtr: string[][], path: Path): number {
+  let counter = 0;
+
+  for (let i = 0; i < mtr.length; i++) {
+    let inRegion = false;
+    let last: string | null = null;
+    for (let j = 0; j < mtr[i]!.length; j++) {
+      const pos: Pos = [i, j];
+      
+      if (isInPath(path, pos)) {
+        const ch = charAt(mtr, pos);
+        if (ch === "|") {
+          inRegion = !inRegion;
+        } else if (ch === "J" && last === "F") {
+          last = null;
+          inRegion = !inRegion;
+        } else if (ch === "7" && last === "L") {
+          last = null;
+          inRegion = !inRegion;
+        } else if (ch === "F" || ch === "L") {
+          last = ch;
+        }
+      } else { 
+        if (inRegion) {
+          counter++;
+        }
+      }
+    }
+  }
+
+  return counter;
+}
+
+function isInPath(path: Path, pos: Pos): boolean {
+  for (const p of path) {
+    if (p[0] === pos[0] && p[1] === pos[1]) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+export const expected1 = 6942;
 export function solve1(lines: string[]): number {
   const mtr = parseInput(lines);
   const paths = findPaths(mtr);
   return (Math.max(...paths.map(p => p.length)) + 1) / 2;
 }
 
-export const expected2 = 0;
+export const expected2 = 297;
 export function solve2(lines: string[]): number {
-  return lines.length;
+  const mtr = parseInput(lines);
+  const paths = findPaths(mtr);
+  paths.sort((a, b) => a.length - b.length);
+  const s = getStartPosition(mtr);
+  mtr[s[0]]![s[1]]! = "J";
+  return enclosed(mtr, [s, ...paths.at(-1)!]);
 }

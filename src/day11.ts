@@ -1,71 +1,68 @@
-type Pos = [number, number];
+type Pos = [row: number, col: number];
+type Expansion = [row: number, col: number];
+type Galaxy = [Pos, Expansion];
 
 function parseInput(lines: string[]): string[][] {
   return lines.map((line) => line.split(''));
 }
 
-function expandSpace(space: string[][]): string[][] {
-  const newSpace = [...space];
-  let i = 0;
+function parseUniverse(space: string[][]): Galaxy[] {
+  let totalEmptyRows = 0;
+  const universe: Galaxy[] = [];
 
-  // Insert row
-  while (i < newSpace.length) {
-    if (newSpace[i]!.every((x) => x === ".")) {
-      newSpace.splice(i, 0, new Array(newSpace[i]!.length).fill('.'));
-      i += 2;
-    } else {
-      i++;
+  for (let row = 0; row < space.length; row++) {
+    let emptyRow = space[row]!.every(ch => ch !== '#');
+    if (emptyRow) {
+      totalEmptyRows++;
     }
-  }
 
-  i = 0;
+    let totalEmptyColumns  = 0;
 
-  // Insert column
-  while (i < newSpace[0]!.length) {
-    const col = newSpace.map((row) => row[i]!);
+    for (let col = 0; col < space[row]!.length; col++) {
+      const emptyCol = space.map(row => row[col]!).every(ch => ch !== '#');
 
-    if (col.every((x) => x === ".")) {
-      for (let row = 0; row < newSpace.length; row++) {
-        newSpace[row]!.splice(i, 0, ".");
+      if (emptyCol) {
+        totalEmptyColumns++;
       }
-      i += 2;
-    } else {
-      i++;
-    }
-  }
 
-  return newSpace;
-}
+      const ch = space[row]![col]!;
 
-function assignIdToGalaxies(space: string[][]) {
-  let id = 1;
-
-  for (let i = 0; i < space.length; i++) {
-    for (let j = 0; j < space[i]!.length; j++) {
-      if (space[i]![j]! === "#") {
-        space[i]![j]! = id.toString();
-        id++;
+      if (ch === '#') {
+        const g: Galaxy = [ [row, col], [totalEmptyRows, totalEmptyColumns] ]
+        universe.push(g);
       }
     }
   }
+
+  return universe;
 }
 
-function dist(posA: Pos, posB: Pos): number {
+function realPosition(g: Galaxy, expRate: number): Pos {
+  const [pos, exp] = g;
+  return [pos[0] + exp[0] * expRate, pos[1] + exp[1] * expRate];
+}
+
+function dist(a: Galaxy, b: Galaxy, rate: number): number {
+  const posA = realPosition(a, rate);
+  const posB = realPosition(b, rate);
+
   const dy = Math.abs(posA[0] - posB[0]);
   const dx = Math.abs(posA[1] - posB[1]);
   return dy + dx;
 }
 
-function distanceSum(space: string[][]): number {
-  const galaxies = getGalaxies(space);
+function distanceSum(space: string[][], sol: number): number {
+  const rate = sol === 1 ? 1 : (1_000_000 - 1);
+  const galaxies = parseUniverse(space);
+
   let sum = 0;
 
   for (let i = 0; i < galaxies.length - 1; i++) {
     for (let j = i + 1; j < galaxies.length; j++) {
-      const [, posA] = galaxies[i]!;
-      const [, posB] = galaxies[j]!;
+      const a = galaxies[i]!;
+      const b = galaxies[j]!;
 
-      const d = dist(posA, posB);
+      const d = dist(a, b, rate);
       sum += d;
     }
   }
@@ -73,30 +70,14 @@ function distanceSum(space: string[][]): number {
   return sum;
 }
 
-function getGalaxies(space: string[][]): [number, Pos][] {
-  const galaxies: [number, Pos][] = [];
-
-  for (let i = 0; i < space.length; i++) {
-    for (let j = 0; j < space[i]!.length; j++) {
-      const ch = space[i]![j]!;
-      if (ch !== '.') {
-        galaxies.push([+ch, [i, j]]);
-      }
-    }
-  }
-
-  return galaxies;
-}
-
-export const expected1 = 0;
+export const expected1 = 10422930;
 export function solve1(lines: string[]): number {
   const space = parseInput(lines);
-  const expandedSpace = expandSpace(space);
-  assignIdToGalaxies(expandedSpace);
-  return distanceSum(expandedSpace);
+  return distanceSum(space, 1);
 }
 
-export const expected2 = 0;
+export const expected2 = 699909023130;
 export function solve2(lines: string[]): number {
-  return lines.length;
+  const space = parseInput(lines);
+  return distanceSum(space, 2);
 }

@@ -5,23 +5,23 @@ type Input = Matrix[];
 type Reflection = { row: number | undefined, col: number | undefined; };
 
 function parseInput(lines: string[]): Input {
-  const input: Input = [];
+  const matrices: Input = [];
   let tmp: number[][] = [];
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i]!.trim();
 
     if (line === '') {
-      input.push([...tmp.map(line => [...line])]);
+      matrices.push([...tmp]);
       tmp.length = 0;
     } else {
       tmp.push(line.split('').map(x => x === '#' ? 1 : 0));
     }
   }
 
-  input.push([...tmp.map(line => [...line])])
+  matrices.push([...tmp])
 
-  return input;
+  return matrices;
 }
 
 function hash(s: number[]): number {
@@ -54,30 +54,27 @@ function reflection(mtr: Matrix, orig?: Reflection | undefined): Reflection {
 
   if (orig) {
     return {
-      row: horRefs.filter(r => r !== orig.row)[0]!,
-      col: verRefs.filter(r => r !== orig.col)[0]!,
+      row: horRefs.filter(r => r !== orig.row)[0],
+      col: verRefs.filter(r => r !== orig.col)[0],
     };
   }
 
   return {
-    row: horRefs[0]!,
-    col: verRefs[0]!,
+    row: horRefs[0],
+    col: verRefs[0],
   };
 }
 
 function reflectionValue(ref: Reflection): number {
-  const { row, col } = ref;
-  let result = 0;
-
-  if (row !== undefined) {
-    result += (row + 1) * 100;
+  if (ref.row !== undefined) {
+    return (ref.row + 1) * 100;
   }
 
-  if (col !== undefined) {
-    result += col + 1;
+  if (ref.col !== undefined) {
+    return ref.col + 1;
   }
 
-  return result;
+  throw new Error('Invalid reflection');
 }
 
 function computeRefValue(mtr: Matrix): number {
@@ -100,10 +97,6 @@ function computeRefValue2(mtr: Matrix): number {
 
       if (newRef.col === origRef.col && newRef.row === origRef.row) {
         continue;
-      }
-
-      if (newRef.col !== undefined && newRef.row !== undefined) {
-        return 0;
       }
 
       return reflectionValue(newRef);
@@ -154,7 +147,7 @@ export function solve1(lines: string[]): number {
   return sum;
 }
 
-export const expected2 = 0;
+export const expected2 = 36771;
 export function solve2(lines: string[]): number {
   const input = parseInput(lines);
   let sum = 0;

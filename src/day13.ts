@@ -1,15 +1,121 @@
-type Matrix = string[][];
+type Matrix = number[][];
 
 type Input = Matrix[];
 
-type Reflection = { row: number | null, col: number | null; };
+type Reflection = { row: number | undefined, col: number | undefined; };
 
-function hash(s: string[]): number {
-  const changed = s.map(ch => ch === '#' ? '1' : '0').join('');
-  return parseInt(changed, 2);
+function parseInput(lines: string[]): Input {
+  const input: Input = [];
+  let tmp: number[][] = [];
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i]!.trim();
+
+    if (line === '') {
+      input.push([...tmp.map(line => [...line])]);
+      tmp.length = 0;
+    } else {
+      tmp.push(line.split('').map(x => x === '#' ? 1 : 0));
+    }
+  }
+
+  input.push([...tmp.map(line => [...line])])
+
+  return input;
 }
 
-function symmetryPoint(arr: number[]): number | null {
+function hash(s: number[]): number {
+  return parseInt(s.join(''));
+}
+
+function findHorizontalReflections(mtr: Matrix): number[] {
+  const rows: number[] = [];
+
+  for (let i = 0; i < mtr.length; i++) {
+    rows.push(hash(mtr[i]!));
+  }
+
+  return symmetryPoint(rows);
+}
+
+function findVerticalReflections(mtr: Matrix): number[] {
+  const cols: number[] = [];
+
+  for (let i = 0; i < mtr[0]!.length; i++) {
+    cols.push(hash(mtr.map(row => row[i]!)));
+  }
+
+  return symmetryPoint(cols);
+}
+
+function reflection(mtr: Matrix, orig?: Reflection | undefined): Reflection {
+  const horRefs = findHorizontalReflections(mtr);
+  const verRefs = findVerticalReflections(mtr);
+
+  if (orig) {
+    return {
+      row: horRefs.filter(r => r !== orig.row)[0]!,
+      col: verRefs.filter(r => r !== orig.col)[0]!,
+    };
+  }
+
+  return {
+    row: horRefs[0]!,
+    col: verRefs[0]!,
+  };
+}
+
+function reflectionValue(ref: Reflection): number {
+  const { row, col } = ref;
+  let result = 0;
+
+  if (row !== undefined) {
+    result += (row + 1) * 100;
+  }
+
+  if (col !== undefined) {
+    result += col + 1;
+  }
+
+  return result;
+}
+
+function computeRefValue(mtr: Matrix): number {
+  return reflectionValue(reflection(mtr));
+}
+
+function computeRefValue2(mtr: Matrix): number {
+  const origRef = reflection(mtr);
+
+  for (let i = 0; i < mtr.length; i++) {
+    for (let j = 0; j < mtr[i]!.length; j++) {
+      const c = mtr[i]![j]!;
+      mtr[i]![j]! = c === 1 ? 0 : 1;
+      const newRef = reflection(mtr, origRef);
+      mtr[i]![j]! = c;
+
+      if (newRef.col === undefined && newRef.row === undefined) {
+        continue;
+      }
+
+      if (newRef.col === origRef.col && newRef.row === origRef.row) {
+        continue;
+      }
+
+      if (newRef.col !== undefined && newRef.row !== undefined) {
+        return 0;
+      }
+
+      return reflectionValue(newRef);
+    }
+  }
+
+  return 0;
+}
+
+function symmetryPoint(arr: number[]): number[] {
+  const res: number[] = [];
+
   for (let i = 0; i < arr.length - 1; i++) {
     let j = 0;
     let flag = true;
@@ -29,76 +135,11 @@ function symmetryPoint(arr: number[]): number | null {
     }
 
     if (!bound) {
-      return i;
+      res.push(i);
     }
   }
 
-  return null;
-}
-
-function findHorizontalReflection(mtr: Matrix): number | null {
-  const rows: number[] = [];
-
-  for (let i = 0; i < mtr.length; i++) {
-    rows.push(hash(mtr[i]!));
-  }
-
-  return symmetryPoint(rows);
-}
-
-function findVerticalReflection(mtr: Matrix): number | null {
-  const cols: number[] = [];
-
-  for (let i = 0; i < mtr[0]!.length; i++) {
-    cols.push(hash(mtr.map(row => row[i]!)));
-  }
-
-  return symmetryPoint(cols);
-}
-
-function reflection(mtr: Matrix): Reflection {
-  const horRef = findHorizontalReflection(mtr);
-  const verRef = findVerticalReflection(mtr);
-
-  return {
-    row: horRef,
-    col: verRef,
-  };
-}
-
-function computeRefValue(mtr: Matrix): number {
-  const { row, col } = reflection(mtr);
-  let result = 0;
-
-  if (row !== null) {
-    result += (row + 1) * 100;
-  }
-
-  if (col !== null) {
-    result += col + 1;
-  }
-
-  return result;
-}
-
-function parseInput(lines: string[]): Input {
-  const input: Input = [];
-  let tmp: string[] = [];
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i]!.trim();
-
-    if (line === '') {
-      input.push([...tmp.map(line => line.split(''))]);
-      tmp.length = 0;
-    } else {
-      tmp.push(line);
-    }
-  }
-
-  input.push([...tmp.map(line => line.split(''))])
-
-  return input;
+  return res;
 }
 
 export const expected1 = 43614;
@@ -115,5 +156,12 @@ export function solve1(lines: string[]): number {
 
 export const expected2 = 0;
 export function solve2(lines: string[]): number {
-  return lines.length;
+  const input = parseInput(lines);
+  let sum = 0;
+
+  for (const mtr of input) {
+    sum += computeRefValue2(mtr);
+  }
+
+  return sum;
 }

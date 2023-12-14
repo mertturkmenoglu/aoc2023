@@ -1,17 +1,17 @@
 import { readLines } from './file';
 
-type Day = {
-  module: any;
-  lines: string[];
-  num: number;
-};
+interface Day {
+  module: any
+  lines: string[]
+  num: number
+}
 
 export async function getDayFromArgs(): Promise<Day> {
   const dayStr = process.argv[2];
   const dayrgx = /^day\d+$/;
   const inprgx = /\d+/;
 
-  if (!dayStr || !dayrgx.test(dayStr)) {
+  if (dayStr === undefined || !dayrgx.test(dayStr)) {
     console.error(`Invalid param: ${dayStr}`);
     process.exit(1);
   }
@@ -19,7 +19,7 @@ export async function getDayFromArgs(): Promise<Day> {
   const module = await import(`./${dayStr}`);
   const dayNumStr = dayStr.match(inprgx)?.[0];
 
-  if (!dayNumStr || isNaN(parseInt(dayNumStr))) {
+  if (dayNumStr === undefined || isNaN(parseInt(dayNumStr))) {
     console.error(`Invalid param, cannot extract day number: ${dayStr}`);
     process.exit(1);
   }
@@ -30,6 +30,6 @@ export async function getDayFromArgs(): Promise<Day> {
   return {
     module,
     lines,
-    num,
+    num
   };
 }

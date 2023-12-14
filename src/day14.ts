@@ -45,7 +45,7 @@ function getLoad(mtr: Grid): number {
   return load;
 }
 
-function tiltVert(mtr: string[][], dir: 'N' | 'S') {
+function tiltVert(mtr: string[][], dir: 'N' | 'S'): void {
   for (let col = 0; col < mtr[0]!.length; col++) {
     const arr = mtr.map((row) => row[col]!);
     const sections = arr.join('').split('#');
@@ -55,12 +55,12 @@ function tiltVert(mtr: string[][], dir: 'N' | 'S') {
       .split('');
 
     for (let row = 0; row < mtr.length; row++) {
-      mtr[row]![col]! = newChars[row]!;
+      mtr[row]![col] = newChars[row]!;
     }
   }
 }
 
-function tiltHor(mtr: string[][], dir: 'W' | 'E') {
+function tiltHor(mtr: string[][], dir: 'W' | 'E'): void {
   for (let row = 0; row < mtr.length; row++) {
     const sections = mtr[row]!.join('').split('#');
     const newChars = sections
@@ -69,12 +69,12 @@ function tiltHor(mtr: string[][], dir: 'W' | 'E') {
       .split('');
 
     for (let col = 0; col < mtr[row]!.length; col++) {
-      mtr[row]![col]! = newChars[col]!;
+      mtr[row]![col] = newChars[col]!;
     }
   }
 }
 
-function cycle(mtr: Grid) {
+function cycle(mtr: Grid): void {
   tiltVert(mtr, 'N');
   tiltHor(mtr, 'W');
   tiltVert(mtr, 'S');

@@ -23,7 +23,7 @@ export function solve1(lines: string[]): number {
 }
 
 export const expected2 = 5095824;
-export function solve2(lines: string[]) {
+export function solve2(lines: string[]): number {
   const m = new Array(lines.length).fill(1);
 
   for (let i = 0; i < m.length; i++) {

@@ -1,7 +1,7 @@
-type Race = {
-  time: number;
-  distance: number;
-};
+interface Race {
+  time: number
+  distance: number
+}
 
 type TInput = Race[];
 
@@ -21,7 +21,7 @@ function parseInput(lines: string[]): TInput {
   const [times, distances] = parseTimeAndDistance(lines);
   return new Array(times.length).fill(0).map((_, i) => ({
     time: +times[i]!,
-    distance: +distances[i]!,
+    distance: +distances[i]!
   }));
 }
 

@@ -1,7 +1,7 @@
 import { assert } from 'node:console';
 import { getDayFromArgs } from './cli';
 
-async function main() {
+async function main(): Promise<void> {
   const { module, lines, num } = await getDayFromArgs();
   const start = performance.now();
   const res1 = module.solve1(lines);
@@ -20,4 +20,4 @@ async function main() {
   assert(exp2 === res2, 'part 2 failed');
 }
 
-main();
+void main();

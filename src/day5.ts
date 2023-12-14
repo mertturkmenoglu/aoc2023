@@ -1,13 +1,13 @@
-type TMap = {
-  dst: number;
-  src: number;
-  length: number;
-};
+interface TMap {
+  dst: number
+  src: number
+  length: number
+}
 
-type TInput = {
-  seeds: number[];
-  mappings: TMap[][];
-};
+interface TInput {
+  seeds: number[]
+  mappings: TMap[][]
+}
 
 function getSections(lines: string[]): [seeds: string[], rest: string[][]] {
   const sections: string[][] = [];
@@ -28,7 +28,7 @@ function getSections(lines: string[]): [seeds: string[], rest: string[][]] {
 }
 
 function parseSeeds(seeds: string[]): number[] {
-  const [_, str] = seeds[0]!.split(': ');
+  const [, str] = seeds[0]!.split(': ');
   return str!.split(' ').map(parseFloat);
 }
 
@@ -46,7 +46,7 @@ function parseInput(lines: string[]): TInput {
 
   return {
     seeds: parseSeeds(seeds),
-    mappings: parseMappings(rest),
+    mappings: parseMappings(rest)
   };
 }
 
@@ -56,7 +56,7 @@ function getMap(x: number, maps: TMap[]): TMap | undefined {
 
 function getTarget(x: number, maps: TMap[]): number {
   const map = getMap(x, maps);
-  return map ? map.dst + (x - map.src) : x;
+  return map !== undefined ? map.dst + (x - map.src) : x;
 }
 
 function seedToLocation(seed: number, mappings: TMap[][]): number {
@@ -73,7 +73,7 @@ export const expected2 = 108956227;
 export function solve2(lines: string[]): number {
   const { seeds, mappings } = parseInput(lines);
   let min = Number.POSITIVE_INFINITY;
-  const ranges: [number, number][] = [];
+  const ranges: Array<[number, number]> = [];
 
   for (let i = 0; i < seeds.length; i += 2) {
     ranges.push([seeds[i]!, seeds[i + 1]!]);
@@ -84,7 +84,7 @@ export function solve2(lines: string[]): number {
     while (seed < start + len) {
       const map = getMap(seed, mappings[0]!);
       min = Math.min(min, seedToLocation(seed, mappings));
-      seed = map ? map.src + map.length : seed + len;
+      seed = map !== undefined ? map.src + map.length : seed + len;
     }
   }
 

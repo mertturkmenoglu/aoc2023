@@ -2,11 +2,14 @@ type Matrix = number[][];
 
 type Input = Matrix[];
 
-type Reflection = { row: number | undefined; col: number | undefined };
+interface Reflection {
+  row: number | undefined
+  col: number | undefined
+}
 
 function parseInput(lines: string[]): Input {
   const matrices: Input = [];
-  let tmp: number[][] = [];
+  const tmp: number[][] = [];
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i]!.trim();
@@ -52,16 +55,16 @@ function reflection(mtr: Matrix, orig?: Reflection | undefined): Reflection {
   const horRefs = findHorizontalReflections(mtr);
   const verRefs = findVerticalReflections(mtr);
 
-  if (orig) {
+  if (orig !== undefined) {
     return {
       row: horRefs.filter((r) => r !== orig.row)[0],
-      col: verRefs.filter((r) => r !== orig.col)[0],
+      col: verRefs.filter((r) => r !== orig.col)[0]
     };
   }
 
   return {
     row: horRefs[0],
-    col: verRefs[0],
+    col: verRefs[0]
   };
 }
 
@@ -87,9 +90,9 @@ function computeRefValue2(mtr: Matrix): number {
   for (let i = 0; i < mtr.length; i++) {
     for (let j = 0; j < mtr[i]!.length; j++) {
       const c = mtr[i]![j]!;
-      mtr[i]![j]! = c === 1 ? 0 : 1;
+      mtr[i]![j] = c === 1 ? 0 : 1;
       const newRef = reflection(mtr, origRef);
-      mtr[i]![j]! = c;
+      mtr[i]![j] = c;
 
       if (newRef.col === undefined && newRef.row === undefined) {
         continue;
@@ -115,8 +118,8 @@ function symmetryPoint(arr: number[]): number[] {
     let bound = true;
 
     while (flag && bound) {
-      let lo = i - j;
-      let hi = i + j + 1;
+      const lo = i - j;
+      const hi = i + j + 1;
 
       if (lo < 0 || hi >= arr.length) {
         bound = false;

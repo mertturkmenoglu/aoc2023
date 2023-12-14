@@ -1,13 +1,13 @@
-type TNode = {
-  value: string;
-  left: string;
-  right: string;
-};
+interface TNode {
+  value: string
+  left: string
+  right: string
+}
 
-type TInput = {
-  instructions: string[];
-  network: TNode[];
-};
+interface TInput {
+  instructions: string[]
+  network: TNode[]
+}
 
 let inp: TInput | null = null;
 
@@ -26,13 +26,13 @@ function parseNetwork(lines: string[]): TNode[] {
 }
 
 function parseInput(lines: string[]): TInput {
-  if (!inp) {
-    const [instructionsLine, _, ...rest] = lines;
+  if (inp === null) {
+    const [instructionsLine, , ...rest] = lines;
     inp = {
       instructions: instructionsLine!.split(''),
       network: parseNetwork(rest).sort((a, b) =>
         a.value.localeCompare(b.value)
-      ),
+      )
     };
   }
   return inp;
@@ -80,10 +80,10 @@ function findSteps(
   { instructions, network }: TInput,
   sol: number
 ): number {
-  let steps = 0,
-    i = 0,
-    curr = pos,
-    ins = instructions[i]!;
+  let steps = 0;
+  let i = 0;
+  let curr = pos;
+  let ins = instructions[i]!;
   const token = sol === 1 ? 'ZZZ' : 'Z';
 
   while (!curr.value.endsWith(token)) {

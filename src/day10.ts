@@ -1,7 +1,7 @@
 type Pos = [number, number];
 type Path = Pos[];
 
-let visited = new Map<string, boolean>();
+const visited = new Map<string, boolean>();
 let pathMap: Map<string, boolean> | null = null;
 const gPaths: Path[] = [];
 let gMtr: string[][] | null = null;
@@ -19,11 +19,11 @@ const southChars = ['|', 'L', 'J', 'S'];
 const eastChars = ['-', 'J', '7', 'S'];
 
 function isPipeChar(ch: string | undefined): ch is PipeChar {
-  return pipeChars.indexOf(ch as PipeChar) !== -1;
+  return pipeChars.includes(ch as PipeChar);
 }
 
 function parseInput(lines: string[]): string[][] {
-  if (gMtr) {
+  if (gMtr !== null) {
     return gMtr;
   }
   gMtr = lines.map((line) => line.split(''));
@@ -50,11 +50,11 @@ function getSurroundings(mtr: string[][], pos: Pos): Pos[] {
   const res: Pos[] = [];
   const curr = mtr[pos[0]]![pos[1]]!;
 
-  const surr: [string | undefined, Pos, string[], string[]][] = [
+  const surr: Array<[string | undefined, Pos, string[], string[]]> = [
     [mtr[pos[0] - 1]?.[pos[1]], [pos[0] - 1, pos[1]], toNorth, northChars],
     [mtr[pos[0]]![pos[1] - 1], [pos[0], pos[1] - 1], toWest, westChars],
     [mtr[pos[0] + 1]?.[pos[1]], [pos[0] + 1, pos[1]], toSouth, southChars],
-    [mtr[pos[0]]![pos[1] + 1], [pos[0], pos[1] + 1], toEast, eastChars],
+    [mtr[pos[0]]![pos[1] + 1], [pos[0], pos[1] + 1], toEast, eastChars]
   ];
 
   surr.forEach(([el, pos, toChars, chars]) => {
@@ -100,11 +100,11 @@ function findPaths(mtr: string[][]): Path[] {
 
       newPos = filtered[0]!;
       if (mtr[newPos[0]]![newPos[1]]! === 'S') {
-        break;
+        flag = false;
+      } else {
+        path.push(newPos);
+        visited.set(posKey(newPos), true);
       }
-
-      path.push(newPos);
-      visited.set(posKey(newPos), true);
     }
 
     gPaths.push(path);
@@ -154,7 +154,7 @@ function enclosed(mtr: string[][], path: Path): number {
 }
 
 function isInPath(path: Path, pos: Pos): boolean {
-  if (!pathMap) {
+  if (pathMap === null) {
     pathMap = new Map<string, boolean>();
     for (const p of path) {
       pathMap.set(posKey(p), true);
@@ -176,6 +176,6 @@ export function solve2(lines: string[]): number {
   const paths = findPaths(mtr);
   paths.sort((a, b) => a.length - b.length);
   const s = getStartPosition(mtr);
-  mtr[s[0]]![s[1]]! = 'J';
+  mtr[s[0]]![s[1]] = 'J';
   return enclosed(mtr, [s, ...paths.at(-1)!]);
 }

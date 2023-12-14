@@ -5,18 +5,18 @@ const handTypes = [
   'Three',
   'FullHouse',
   'Four',
-  'Five',
+  'Five'
 ] as const;
 type HandType = (typeof handTypes)[number];
 
-type Hand = {
-  cards: string[];
-  type: HandType;
-  bid: number;
-};
+interface Hand {
+  cards: string[]
+  type: HandType
+  bid: number
+}
 
 function typeFromGroup(group: Map<string, number>): HandType {
-  const count = (n: number) =>
+  const count = (n: number): boolean =>
     [...group.entries()].some(([_, count]) => count === n);
   switch (group.size) {
     case 1:
@@ -38,17 +38,17 @@ function computeType(cards: string[], s2?: boolean): HandType {
   let jCounter = 0;
 
   for (const card of cards) {
-    if (!s2 || (s2 && card !== 'J')) {
+    if (s2 === undefined || (s2 && card !== 'J')) {
       group.set(card, (group.get(card) ?? 0) + 1);
     } else {
       jCounter++;
     }
   }
 
-  if (s2) {
+  if (s2 === true) {
     const entries = [...group.entries()].sort((a, b) => a[1] - b[1]);
     const max = entries[entries.length - 1];
-    const [k, v] = max ? [max[0], max[1] + jCounter] : ['J', 5];
+    const [k, v] = max !== undefined ? [max[0], max[1] + jCounter] : ['J', 5];
     group.set(k, v);
   }
 
@@ -69,19 +69,19 @@ function getCardValue(card: string, s2?: boolean): number {
     A: 14,
     K: 13,
     Q: 12,
-    J: s2 ? 1 : 11,
+    J: s2 === true ? 1 : 11,
     T: 10,
-    '9': 9,
-    '8': 8,
-    '7': 7,
-    '6': 6,
-    '5': 5,
-    '4': 4,
-    '3': 3,
-    '2': 2,
+    9: 9,
+    8: 8,
+    7: 7,
+    6: 6,
+    5: 5,
+    4: 4,
+    3: 3,
+    2: 2
   };
   const v = map[card];
-  if (!v) throw Error(`Invalid card: ${card}`);
+  if (v === undefined) throw Error(`Invalid card: ${card}`);
   return v;
 }
 
@@ -90,10 +90,10 @@ function compareHands(a: Hand, b: Hand, s2?: boolean): number {
   return ai !== bi
     ? ai! - bi!
     : a.cards
-        .map(
-          (cardA, i) => getCardValue(cardA, s2) - getCardValue(b.cards[i]!, s2)
-        )
-        .find((v) => v !== 0) ?? 0;
+      .map(
+        (cardA, i) => getCardValue(cardA, s2) - getCardValue(b.cards[i]!, s2)
+      )
+      .find((v) => v !== 0) ?? 0;
 }
 
 export const expected1 = 253910319;

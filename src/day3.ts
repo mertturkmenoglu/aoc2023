@@ -1,6 +1,7 @@
-const sym = (s: string) => s !== '.';
+/* eslint-disable @typescript-eslint/strict-boolean-expressions */
+const sym = (s: string): boolean => s !== '.';
 const num = (s: string | undefined): s is string => !!s && !isNaN(parseInt(s));
-const check = (lines: string[], i: number, j: number) => num(lines[i]?.[j]);
+const check = (lines: string[], i: number, j: number): boolean => num(lines[i]?.[j]);
 const set = (
   lines: string[],
   i: number,
@@ -8,12 +9,12 @@ const set = (
   s: number,
   e: number,
   idx: number
-) => {
+): void => {
   if (num(lines[i]!.substring(s, e))) {
     arr[idx] = lines[i]!.substring(s, e);
   }
 };
-const pred = (a: (string | undefined)[]): boolean =>
+const pred = (a: Array<string | undefined>): boolean =>
   a.some((c) => !!c && sym(c));
 
 function isAdj(l: string[], i: number, s: number, e: number): boolean {
@@ -44,7 +45,7 @@ function getAdjNums(l: string[], i: number, j: number): number[] {
 
 function getGearRatio(l: string[], i: number, j: number): number {
   const adj: number[] = [];
-  const pushSub = (s: number, e: number) => {
+  const pushSub = (s: number, e: number): void => {
     if (num(l[i]?.substring(s, e))) {
       adj.push(+l[i]!.substring(s, e));
     }
@@ -66,12 +67,12 @@ function getGearRatio(l: string[], i: number, j: number): number {
 export const expected1 = 537732;
 export function solve1(lines: string[]): number {
   return lines.reduce((acc, line, i) => {
-    let j = 0,
-      sum = 0;
+    let j = 0;
+    let sum = 0;
     while (j < line.length) {
-      if (num(line[j]!)) {
+      if (num(line[j])) {
         const start = j;
-        while (num(line[j]!)) {
+        while (num(line[j])) {
           j++;
         }
         sum += isAdj(lines, i, start, j) ? +line.substring(start, j) : 0;

@@ -1,7 +1,7 @@
-type NumPos = {
-  num: number;
-  pos: number;
-};
+interface NumPos {
+  num: number
+  pos: number
+}
 
 export const expected1 = 54697;
 export function solve1(lines: string[]): number {
@@ -44,7 +44,7 @@ export function solve2(lines: string[]): number {
     'six',
     'seven',
     'eight',
-    'nine',
+    'nine'
   ];
   let sum = 0;
 

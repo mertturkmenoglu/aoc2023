@@ -1,13 +1,13 @@
-type Game = {
-  id: number;
-  reveals: Reveal[];
-};
+interface Game {
+  id: number
+  reveals: Reveal[]
+}
 
-type Reveal = {
-  red: number;
-  green: number;
-  blue: number;
-};
+interface Reveal {
+  red: number
+  green: number
+  blue: number
+}
 
 function parseGame(line: string): Game {
   const [gameStr, rest] = line.split(':');
@@ -24,7 +24,7 @@ function parseGame(line: string): Game {
       }
 
       return parsedReveal;
-    }),
+    })
   };
 }
 
@@ -35,9 +35,9 @@ function isGamePossible(game: Game, c: Reveal): boolean {
 }
 
 function power(game: Game): number {
-  let minRed = 1,
-    minGreen = 1,
-    minBlue = 1;
+  let minRed = 1;
+  let minGreen = 1;
+  let minBlue = 1;
 
   for (const r of game.reveals) {
     if (r.red > minRed) {

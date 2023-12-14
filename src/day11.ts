@@ -27,7 +27,7 @@ function parseUniverse(lines: string[]): Galaxy[] {
       if (space[row]![col]! === '#') {
         universe.push([
           [row, col],
-          [emptyRows, emptyCols],
+          [emptyRows, emptyCols]
         ]);
       }
     }

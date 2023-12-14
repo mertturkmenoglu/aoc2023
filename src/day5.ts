@@ -7,7 +7,7 @@ type TMap = {
 type TInput = {
   seeds: number[];
   mappings: TMap[][];
-}
+};
 
 function getSections(lines: string[]): [seeds: string[], rest: string[][]] {
   const sections: string[][] = [];
@@ -18,7 +18,7 @@ function getSections(lines: string[]): [seeds: string[], rest: string[][]] {
       tmp.push(line);
     } else {
       sections.push([...tmp]);
-      tmp.length = 0
+      tmp.length = 0;
     }
   }
 
@@ -34,7 +34,7 @@ function parseSeeds(seeds: string[]): number[] {
 
 function parseMapLine(s: string): TMap {
   const [dst, src, l] = s.split(' ');
-  return { dst: +dst!, src: +src!, length: +l!, };
+  return { dst: +dst!, src: +src!, length: +l! };
 }
 
 function parseMappings(mappings: string[][]): TMap[][] {
@@ -46,7 +46,7 @@ function parseInput(lines: string[]): TInput {
 
   return {
     seeds: parseSeeds(seeds),
-    mappings: parseMappings(rest)
+    mappings: parseMappings(rest),
   };
 }
 

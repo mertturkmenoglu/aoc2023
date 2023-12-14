@@ -1,5 +1,5 @@
 import { assert } from 'node:console';
-import { getDayFromArgs } from './cli'
+import { getDayFromArgs } from './cli';
 
 async function main() {
   const { module, lines, num } = await getDayFromArgs();
@@ -20,4 +20,4 @@ async function main() {
   assert(exp2 === res2, 'part 2 failed');
 }
 
-main()
+main();

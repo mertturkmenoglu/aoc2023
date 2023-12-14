@@ -2,7 +2,7 @@ type Matrix = number[][];
 
 type Input = Matrix[];
 
-type Reflection = { row: number | undefined, col: number | undefined; };
+type Reflection = { row: number | undefined; col: number | undefined };
 
 function parseInput(lines: string[]): Input {
   const matrices: Input = [];
@@ -15,11 +15,11 @@ function parseInput(lines: string[]): Input {
       matrices.push([...tmp]);
       tmp.length = 0;
     } else {
-      tmp.push(line.split('').map(x => x === '#' ? 1 : 0));
+      tmp.push(line.split('').map((x) => (x === '#' ? 1 : 0)));
     }
   }
 
-  matrices.push([...tmp])
+  matrices.push([...tmp]);
 
   return matrices;
 }
@@ -42,7 +42,7 @@ function findVerticalReflections(mtr: Matrix): number[] {
   const cols: number[] = [];
 
   for (let i = 0; i < mtr[0]!.length; i++) {
-    cols.push(hash(mtr.map(row => row[i]!)));
+    cols.push(hash(mtr.map((row) => row[i]!)));
   }
 
   return symmetryPoint(cols);
@@ -54,8 +54,8 @@ function reflection(mtr: Matrix, orig?: Reflection | undefined): Reflection {
 
   if (orig) {
     return {
-      row: horRefs.filter(r => r !== orig.row)[0],
-      col: verRefs.filter(r => r !== orig.col)[0],
+      row: horRefs.filter((r) => r !== orig.row)[0],
+      col: verRefs.filter((r) => r !== orig.col)[0],
     };
   }
 

@@ -8,22 +8,27 @@ function parseUniverse(lines: string[]): Galaxy[] {
   let emptyRows = 0;
 
   for (let row = 0; row < space.length; row++) {
-    const isEmptyRow = space[row]!.every(ch => ch !== '#');
-    let emptyCols  = 0;
+    const isEmptyRow = space[row]!.every((ch) => ch !== '#');
+    let emptyCols = 0;
 
     if (isEmptyRow) {
       emptyRows++;
     }
 
     for (let col = 0; col < space[row]!.length; col++) {
-      const isEmptyCol = space.map(row => row[col]!).every(ch => ch !== '#');
+      const isEmptyCol = space
+        .map((row) => row[col]!)
+        .every((ch) => ch !== '#');
 
       if (isEmptyCol) {
         emptyCols++;
       }
 
       if (space[row]![col]! === '#') {
-        universe.push([ [row, col], [emptyRows, emptyCols] ]);
+        universe.push([
+          [row, col],
+          [emptyRows, emptyCols],
+        ]);
       }
     }
   }
@@ -46,7 +51,7 @@ function dist(a: Galaxy, b: Galaxy, rate: number): number {
 }
 
 function distanceSum(lines: string[], sol: number): number {
-  const rate = sol === 1 ? 1 : (1_000_000 - 1);
+  const rate = sol === 1 ? 1 : 1_000_000 - 1;
   const galaxies = parseUniverse(lines);
   let sum = 0;
 

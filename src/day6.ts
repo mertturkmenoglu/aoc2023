@@ -6,7 +6,14 @@ type Race = {
 type TInput = Race[];
 
 function parseTimeAndDistance(lines: string[]): [string[], string[]] {
-  const [t, d] = lines.map((l) => l.split(':').map(x => x.trim())[1]!.split(' ').map(x => x.trim()).filter(x => x !== ''));
+  const [t, d] = lines.map((l) =>
+    l
+      .split(':')
+      .map((x) => x.trim())[1]!
+      .split(' ')
+      .map((x) => x.trim())
+      .filter((x) => x !== '')
+  );
   return [t!, d!];
 }
 
@@ -27,7 +34,7 @@ function winningCount(race: Race): number {
   let counter = 0;
 
   for (let i = 0; i <= race.time; i++) {
-    if ((i * (race.time - i)) > race.distance) {
+    if (i * (race.time - i) > race.distance) {
       counter++;
     }
   }

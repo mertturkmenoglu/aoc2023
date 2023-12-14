@@ -35,7 +35,17 @@ export function solve1(lines: string[]): number {
 
 export const expected2 = 54885;
 export function solve2(lines: string[]): number {
-  const numsAsString = ['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'];
+  const numsAsString = [
+    'one',
+    'two',
+    'three',
+    'four',
+    'five',
+    'six',
+    'seven',
+    'eight',
+    'nine',
+  ];
   let sum = 0;
 
   for (const line of lines) {

@@ -4,7 +4,7 @@ type Day = {
   module: any;
   lines: string[];
   num: number;
-}
+};
 
 export async function getDayFromArgs(): Promise<Day> {
   const dayStr = process.argv[2];
@@ -17,7 +17,7 @@ export async function getDayFromArgs(): Promise<Day> {
   }
 
   const module = await import(`./${dayStr}`);
-  const dayNumStr = dayStr.match(inprgx)?.[0]
+  const dayNumStr = dayStr.match(inprgx)?.[0];
 
   if (!dayNumStr || isNaN(parseInt(dayNumStr))) {
     console.error(`Invalid param, cannot extract day number: ${dayStr}`);

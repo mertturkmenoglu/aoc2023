@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "ts-node src/main.ts",
+    "prettier": "pnpm exec prettier . --write",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -15,6 +16,7 @@
     "typescript": "^5.3.2"
   },
   "devDependencies": {
-    "@types/node": "^20.10.2"
+    "@types/node": "^20.10.2",
+    "prettier": "^3.1.1"
   }
 }

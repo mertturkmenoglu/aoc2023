@@ -1,9 +1,9 @@
 import { readLines } from './file';
 
 interface Day {
-  module: any
-  lines: string[]
-  num: number
+  module: any;
+  lines: string[];
+  num: number;
 }
 
 export async function getDayFromArgs(): Promise<Day> {
@@ -30,6 +30,6 @@ export async function getDayFromArgs(): Promise<Day> {
   return {
     module,
     lines,
-    num
+    num,
   };
 }

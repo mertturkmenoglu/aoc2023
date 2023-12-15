@@ -1,12 +1,12 @@
 interface TMap {
-  dst: number
-  src: number
-  length: number
+  dst: number;
+  src: number;
+  length: number;
 }
 
 interface TInput {
-  seeds: number[]
-  mappings: TMap[][]
+  seeds: number[];
+  mappings: TMap[][];
 }
 
 function getSections(lines: string[]): [seeds: string[], rest: string[][]] {
@@ -46,7 +46,7 @@ function parseInput(lines: string[]): TInput {
 
   return {
     seeds: parseSeeds(seeds),
-    mappings: parseMappings(rest)
+    mappings: parseMappings(rest),
   };
 }
 

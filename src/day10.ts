@@ -54,7 +54,7 @@ function getSurroundings(mtr: string[][], pos: Pos): Pos[] {
     [mtr[pos[0] - 1]?.[pos[1]], [pos[0] - 1, pos[1]], toNorth, northChars],
     [mtr[pos[0]]![pos[1] - 1], [pos[0], pos[1] - 1], toWest, westChars],
     [mtr[pos[0] + 1]?.[pos[1]], [pos[0] + 1, pos[1]], toSouth, southChars],
-    [mtr[pos[0]]![pos[1] + 1], [pos[0], pos[1] + 1], toEast, eastChars]
+    [mtr[pos[0]]![pos[1] + 1], [pos[0], pos[1] + 1], toEast, eastChars],
   ];
 
   surr.forEach(([el, pos, toChars, chars]) => {

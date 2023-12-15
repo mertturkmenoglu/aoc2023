@@ -1,6 +1,6 @@
 interface Lense {
-  label: string
-  len: number
+  label: string;
+  len: number;
 }
 
 function hash(str: string): number {
@@ -31,7 +31,7 @@ function compute(operations: string[]): number {
     if (index === -1) {
       map.set(hashval, [...lenses, lense]);
     } else {
-      map.set(hashval, lenses.toSpliced(index, 1, lense) as Lense[]);
+      map.set(hashval, lenses.toSpliced(index, 1, lense));
     }
   };
 
@@ -39,7 +39,10 @@ function compute(operations: string[]): number {
     const label = op.substring(0, op.length - 1);
     const hashval = hash(label);
     const lenses = map.get(hashval) ?? [];
-    map.set(hashval, lenses.filter((v) => v.label !== label));
+    map.set(
+      hashval,
+      lenses.filter((v) => v.label !== label),
+    );
   };
 
   for (const operation of operations) {
@@ -52,13 +55,17 @@ function compute(operations: string[]): number {
   };
 
   return [...map.entries()]
-    .map(([box, lenses]) => lenses.reduce((acc, lense, i) => acc + power(lense, box, i), 0))
+    .map(([box, lenses]) =>
+      lenses.reduce((acc, lense, i) => acc + power(lense, box, i), 0),
+    )
     .reduce((acc, x) => acc + x, 0);
 }
 
 export const expected1 = 511_416;
 export function solve1(lines: string[]): number {
-  return parseInput(lines[0]!).map(hash).reduce((acc, x) => acc + x, 0);
+  return parseInput(lines[0]!)
+    .map(hash)
+    .reduce((acc, x) => acc + x, 0);
 }
 
 export const expected2 = 290_779;

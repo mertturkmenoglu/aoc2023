@@ -5,14 +5,14 @@ const handTypes = [
   'Three',
   'FullHouse',
   'Four',
-  'Five'
+  'Five',
 ] as const;
 type HandType = (typeof handTypes)[number];
 
 interface Hand {
-  cards: string[]
-  type: HandType
-  bid: number
+  cards: string[];
+  type: HandType;
+  bid: number;
 }
 
 function typeFromGroup(group: Map<string, number>): HandType {
@@ -78,7 +78,7 @@ function getCardValue(card: string, s2?: boolean): number {
     5: 5,
     4: 4,
     3: 3,
-    2: 2
+    2: 2,
   };
   const v = map[card];
   if (v === undefined) throw Error(`Invalid card: ${card}`);
@@ -87,13 +87,15 @@ function getCardValue(card: string, s2?: boolean): number {
 
 function compareHands(a: Hand, b: Hand, s2?: boolean): number {
   const [ai, bi] = [a, b].map((x) => handTypes.indexOf(x.type));
-  return ai !== bi
-    ? ai! - bi!
-    : a.cards
-      .map(
-        (cardA, i) => getCardValue(cardA, s2) - getCardValue(b.cards[i]!, s2)
-      )
-      .find((v) => v !== 0) ?? 0;
+
+  if (ai !== bi) {
+    return ai! - bi!;
+  }
+
+  const values = a.cards.map(
+    (cardA, i) => getCardValue(cardA, s2) - getCardValue(b.cards[i]!, s2),
+  );
+  return values.find((v) => v !== 0) ?? 0;
 }
 
 export const expected1 = 253910319;

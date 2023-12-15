@@ -18,7 +18,7 @@ export const expected1 = 22897;
 export function solve1(lines: string[]): number {
   return lines.reduce(
     (acc, l) => acc + Math.floor(Math.pow(2, matches(parseLine(l)) - 1)),
-    0
+    0,
   );
 }
 

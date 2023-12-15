@@ -1,6 +1,6 @@
 interface Race {
-  time: number
-  distance: number
+  time: number;
+  distance: number;
 }
 
 type TInput = Race[];
@@ -12,7 +12,7 @@ function parseTimeAndDistance(lines: string[]): [string[], string[]] {
       .map((x) => x.trim())[1]!
       .split(' ')
       .map((x) => x.trim())
-      .filter((x) => x !== '')
+      .filter((x) => x !== ''),
   );
   return [t!, d!];
 }
@@ -21,7 +21,7 @@ function parseInput(lines: string[]): TInput {
   const [times, distances] = parseTimeAndDistance(lines);
   return new Array(times.length).fill(0).map((_, i) => ({
     time: +times[i]!,
-    distance: +distances[i]!
+    distance: +distances[i]!,
   }));
 }
 

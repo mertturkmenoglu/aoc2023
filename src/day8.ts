@@ -1,12 +1,12 @@
 interface TNode {
-  value: string
-  left: string
-  right: string
+  value: string;
+  left: string;
+  right: string;
 }
 
 interface TInput {
-  instructions: string[]
-  network: TNode[]
+  instructions: string[];
+  network: TNode[];
 }
 
 let inp: TInput | null = null;
@@ -31,8 +31,8 @@ function parseInput(lines: string[]): TInput {
     inp = {
       instructions: instructionsLine!.split(''),
       network: parseNetwork(rest).sort((a, b) =>
-        a.value.localeCompare(b.value)
-      )
+        a.value.localeCompare(b.value),
+      ),
     };
   }
   return inp;
@@ -78,7 +78,7 @@ function find(network: TNode[], next: string): TNode {
 function findSteps(
   pos: TNode,
   { instructions, network }: TInput,
-  sol: number
+  sol: number,
 ): number {
   let steps = 0;
   let i = 0;

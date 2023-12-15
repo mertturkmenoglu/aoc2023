@@ -3,8 +3,8 @@ type Matrix = number[][];
 type Input = Matrix[];
 
 interface Reflection {
-  row: number | undefined
-  col: number | undefined
+  row: number | undefined;
+  col: number | undefined;
 }
 
 function parseInput(lines: string[]): Input {
@@ -58,13 +58,13 @@ function reflection(mtr: Matrix, orig?: Reflection | undefined): Reflection {
   if (orig !== undefined) {
     return {
       row: horRefs.filter((r) => r !== orig.row)[0],
-      col: verRefs.filter((r) => r !== orig.col)[0]
+      col: verRefs.filter((r) => r !== orig.col)[0],
     };
   }
 
   return {
     row: horRefs[0],
-    col: verRefs[0]
+    col: verRefs[0],
   };
 }
 

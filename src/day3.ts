@@ -1,14 +1,15 @@
 /* eslint-disable @typescript-eslint/strict-boolean-expressions */
 const sym = (s: string): boolean => s !== '.';
 const num = (s: string | undefined): s is string => !!s && !isNaN(parseInt(s));
-const check = (lines: string[], i: number, j: number): boolean => num(lines[i]?.[j]);
+const check = (lines: string[], i: number, j: number): boolean =>
+  num(lines[i]?.[j]);
 const set = (
   lines: string[],
   i: number,
   arr: string[],
   s: number,
   e: number,
-  idx: number
+  idx: number,
 ): void => {
   if (num(lines[i]!.substring(s, e))) {
     arr[idx] = lines[i]!.substring(s, e);

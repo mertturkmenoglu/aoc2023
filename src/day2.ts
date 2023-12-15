@@ -1,12 +1,12 @@
 interface Game {
-  id: number
-  reveals: Reveal[]
+  id: number;
+  reveals: Reveal[];
 }
 
 interface Reveal {
-  red: number
-  green: number
-  blue: number
+  red: number;
+  green: number;
+  blue: number;
 }
 
 function parseGame(line: string): Game {
@@ -24,13 +24,13 @@ function parseGame(line: string): Game {
       }
 
       return parsedReveal;
-    })
+    }),
   };
 }
 
 function isGamePossible(game: Game, c: Reveal): boolean {
   return !game.reveals.some(
-    (r) => r.red > c.red || r.green > c.green || r.blue > c.blue
+    (r) => r.red > c.red || r.green > c.green || r.blue > c.blue,
   );
 }
 

@@ -1,6 +1,6 @@
 interface Lense {
   label: string
-  focalLength: number
+  len: number
 }
 
 function hash(str: string): number {
@@ -25,22 +25,12 @@ function compute(operations: string[]): number {
   const map = new Map<number, Lense[]>();
 
   const equal = (op: string): void => {
-    const [label, focalLengthStr] = op.split('=');
+    const [label, lenstr] = op.split('=');
     const hashval = hash(label!);
-    const lenses = map.get(hashval);
-    const lense: Lense = { label: label!, focalLength: +focalLengthStr! };
-    if (lenses === undefined || lenses.length === 0) {
-      map.set(hashval, [lense]);
-      return;
-    }
+    const lenses = map.get(hashval) ?? [];
+    const lense: Lense = { label: label!, len: +lenstr! };
     const index = lenses.findIndex((v) => v.label === label);
-
-    if (index === -1) {
-      map.set(hashval, [...lenses, lense]);
-    } else {
-      lenses[index] = lense;
-      map.set(hashval, lenses);
-    }
+    map.set(hashval, index === -1 ? [...lenses, lense] : lenses.toSpliced(index, 1, lense) as Lense[]);
   };
 
   const dash = (op: string): void => {
@@ -58,13 +48,9 @@ function compute(operations: string[]): number {
     }
   }
 
-  let sum = 0;
-
-  for (const [boxNumber, lenses] of map) {
-    sum += lenses.map((lense, i) => (1 + boxNumber) * (i + 1) * lense.focalLength).reduce((acc, x) => acc + x, 0);
-  }
-
-  return sum;
+  return [...map.entries()]
+    .map(([box, lenses]) => lenses.map((lense, i) => (1 + box) * (i + 1) * lense.len).reduce((acc, x) => acc + x, 0))
+    .reduce((acc, x) => acc + x, 0);
 }
 
 export const expected1 = 511_416;

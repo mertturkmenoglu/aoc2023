@@ -5,13 +5,9 @@ interface Lense {
 
 function hash(str: string): number {
   let currentValue = 0;
-  const chars = str.split('');
 
-  for (const ch of chars) {
-    const asciiCode = ch.charCodeAt(0);
-    currentValue += asciiCode;
-    currentValue *= 17;
-    currentValue %= 256;
+  for (const ch of str.split('')) {
+    currentValue = ((currentValue + ch.charCodeAt(0)) * 17) % 256;
   }
 
   return currentValue;
@@ -26,11 +22,17 @@ function compute(operations: string[]): number {
 
   const equal = (op: string): void => {
     const [label, lenstr] = op.split('=');
+    const lense: Lense = { label: label!, len: +lenstr! };
+
     const hashval = hash(label!);
     const lenses = map.get(hashval) ?? [];
-    const lense: Lense = { label: label!, len: +lenstr! };
     const index = lenses.findIndex((v) => v.label === label);
-    map.set(hashval, index === -1 ? [...lenses, lense] : lenses.toSpliced(index, 1, lense) as Lense[]);
+
+    if (index === -1) {
+      map.set(hashval, [...lenses, lense]);
+    } else {
+      map.set(hashval, lenses.toSpliced(index, 1, lense) as Lense[]);
+    }
   };
 
   const dash = (op: string): void => {
@@ -41,15 +43,16 @@ function compute(operations: string[]): number {
   };
 
   for (const operation of operations) {
-    if (operation.includes('=')) {
-      equal(operation);
-    } else {
-      dash(operation);
-    }
+    const fn = operation.includes('=') ? equal : dash;
+    fn(operation);
   }
 
+  const power = (lense: Lense, box: number, i: number): number => {
+    return (1 + box) * (i + 1) * lense.len;
+  };
+
   return [...map.entries()]
-    .map(([box, lenses]) => lenses.map((lense, i) => (1 + box) * (i + 1) * lense.len).reduce((acc, x) => acc + x, 0))
+    .map(([box, lenses]) => lenses.reduce((acc, lense, i) => acc + power(lense, box, i), 0))
     .reduce((acc, x) => acc + x, 0);
 }
 

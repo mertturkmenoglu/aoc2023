@@ -4,6 +4,7 @@
     "module": "commonjs",
     "esModuleInterop": true,
     "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "noImplicitAny": true /* Enable error reporting for expressions and declarations with an implied 'any' type. */,
@@ -24,5 +25,5 @@
     "noPropertyAccessFromIndexSignature": true /* Enforces using indexed accessors for keys declared using an indexed type. */,
     "skipLibCheck": true /* Skip type checking all .d.ts files. */
   },
-  "include": ["./.eslintrc.js", "src/*.ts"]
+  "include": ["./.eslintrc.js", "src/*.ts", "src/**/*.ts", "lib/*.ts"]
 }

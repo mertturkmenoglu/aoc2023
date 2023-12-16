@@ -1,23 +1,33 @@
-import { assert } from 'node:console';
-import { getDayFromArgs } from './cli';
+import 'reflect-metadata';
 
-async function main(): Promise<void> {
-  const { module, lines, num } = await getDayFromArgs();
-  const start = performance.now();
-  const res1 = module.solve1(lines);
-  const mid = performance.now();
-  const res2 = module.solve2(lines);
-  const end = performance.now();
-  const exp1 = module.expected1;
-  const exp2 = module.expected2;
+import { getDayFromArgs } from '../lib/cli';
+import { measure } from '../lib/perf';
+import { type AbstractSolution } from '../lib/types';
+import { DecoratorKeys } from '../lib/dec';
 
-  const sol1Time = mid - start;
-  const sol2Time = end - mid;
+function formatTime(t: number): string {
+  return `${t.toFixed(4)} milliseconds`;
+}
 
-  console.log(`Day ${num} result 1: ${res1} | Time: ${sol1Time} milliseconds`);
-  console.log(`Day ${num} result 2: ${res2} | Time: ${sol2Time} milliseconds`);
-  assert(exp1 === res1, 'part 1 failed');
-  assert(exp2 === res2, 'part 2 failed');
+export async function main(): Promise<void> {
+  const { S, lines, num } = await getDayFromArgs();
+  const s: AbstractSolution = new S(lines);
+  const solutions = [
+    { fn: () => s.solve1(), key: 'solve1' },
+    { fn: () => s.solve2(), key: 'solve2' },
+  ].map(({ fn, key }) => {
+    const [result, time] = measure(() => fn());
+    const expected = Reflect.getMetadata(DecoratorKeys.EXPECT, s, key);
+    return {
+      result,
+      expected,
+      time: formatTime(time),
+      correct: result === expected,
+    };
+  });
+
+  console.log(`Day ${num}`);
+  console.table(solutions);
 }
 
 void main();

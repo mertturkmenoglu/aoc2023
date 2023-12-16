@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "ts-node src/main.ts",
+    "aoc": "ts-node src/create.ts",
     "prettier": "pnpm exec prettier . --write",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

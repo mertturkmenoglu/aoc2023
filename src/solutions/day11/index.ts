@@ -1,3 +1,6 @@
+import { Expect } from '../../../lib/dec';
+import { AbstractSolution } from '../../../lib/types';
+
 type Pos = [row: number, col: number];
 type Expansion = [row: number, col: number];
 type Galaxy = [Pos, Expansion];
@@ -66,12 +69,14 @@ function distanceSum(lines: string[], sol: number): number {
   return sum;
 }
 
-export const expected1 = 10_422_930;
-export function solve1(lines: string[]): number {
-  return distanceSum(lines, 1);
-}
+export class Solution extends AbstractSolution {
+  @Expect(10_422_930)
+  override solve1(): string | number {
+    return distanceSum(this.lines, 1);
+  }
 
-export const expected2 = 699_909_023_130;
-export function solve2(lines: string[]): number {
-  return distanceSum(lines, 2);
+  @Expect(699_909_023_130)
+  override solve2(): string | number {
+    return distanceSum(this.lines, 2);
+  }
 }

@@ -1,3 +1,6 @@
+import { Expect } from '../../../lib/dec';
+import { AbstractSolution } from '../../../lib/types';
+
 type Grid = string[][];
 
 type Pos = [number, number];
@@ -148,27 +151,29 @@ function countEnergizedCells(grid: Grid, startBeam: Beam): number {
   return energizedCells.size;
 }
 
-export const expected1 = 7496;
-export function solve1(lines: string[]): number {
-  const grid = parseInput(lines);
-  const beam: Beam = { pos: [0, 0], dir: 'R' };
-  return countEnergizedCells(grid, beam);
-}
-
-export const expected2 = 7932;
-export function solve2(lines: string[]): number {
-  const grid = parseInput(lines);
-  const beams: Beam[] = [];
-
-  for (let row = 0; row < grid.length; row++) {
-    beams.push({ pos: [row, 0], dir: 'R' });
-    beams.push({ pos: [row, grid[row]!.length - 1], dir: 'L' });
+export class Solution extends AbstractSolution {
+  @Expect(7496)
+  override solve1(): string | number {
+    const grid = parseInput(this.lines);
+    const beam: Beam = { pos: [0, 0], dir: 'R' };
+    return countEnergizedCells(grid, beam);
   }
 
-  for (let col = 0; col < grid[0]!.length; col++) {
-    beams.push({ pos: [0, col], dir: 'D' });
-    beams.push({ pos: [0, grid.length - 1], dir: 'U' });
-  }
+  @Expect(7932)
+  override solve2(): string | number {
+    const grid = parseInput(this.lines);
+    const beams: Beam[] = [];
 
-  return Math.max(...beams.map((b) => countEnergizedCells(grid, b)));
+    for (let row = 0; row < grid.length; row++) {
+      beams.push({ pos: [row, 0], dir: 'R' });
+      beams.push({ pos: [row, grid[row]!.length - 1], dir: 'L' });
+    }
+
+    for (let col = 0; col < grid[0]!.length; col++) {
+      beams.push({ pos: [0, col], dir: 'D' });
+      beams.push({ pos: [0, grid.length - 1], dir: 'U' });
+    }
+
+    return Math.max(...beams.map((b) => countEnergizedCells(grid, b)));
+  }
 }

@@ -1,3 +1,6 @@
+import { Expect } from '../../../lib/dec';
+import { AbstractSolution } from '../../../lib/types';
+
 type Pos = [number, number];
 type Path = Pos[];
 
@@ -164,18 +167,20 @@ function isInPath(path: Path, pos: Pos): boolean {
   return pathMap.get(posKey(pos)) ?? false;
 }
 
-export const expected1 = 6942;
-export function solve1(lines: string[]): number {
-  const paths = getPathsFromInput(lines);
-  return (Math.max(...paths.map((p) => p.length)) + 1) / 2;
-}
+export class Solution extends AbstractSolution {
+  @Expect(6942)
+  override solve1(): string | number {
+    const paths = getPathsFromInput(this.lines);
+    return (Math.max(...paths.map((p) => p.length)) + 1) / 2;
+  }
 
-export const expected2 = 297;
-export function solve2(lines: string[]): number {
-  const mtr = parseInput(lines);
-  const paths = findPaths(mtr);
-  paths.sort((a, b) => a.length - b.length);
-  const s = getStartPosition(mtr);
-  mtr[s[0]]![s[1]] = 'J';
-  return enclosed(mtr, [s, ...paths.at(-1)!]);
+  @Expect(297)
+  override solve2(): string | number {
+    const mtr = parseInput(this.lines);
+    const paths = findPaths(mtr);
+    paths.sort((a, b) => a.length - b.length);
+    const s = getStartPosition(mtr);
+    mtr[s[0]]![s[1]] = 'J';
+    return enclosed(mtr, [s, ...paths.at(-1)!]);
+  }
 }

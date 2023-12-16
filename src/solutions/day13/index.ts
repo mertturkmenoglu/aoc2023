@@ -1,3 +1,6 @@
+import { Expect } from '../../../lib/dec';
+import { AbstractSolution } from '../../../lib/types';
+
 type Matrix = number[][];
 
 type Input = Matrix[];
@@ -138,26 +141,28 @@ function symmetryPoint(arr: number[]): number[] {
   return res;
 }
 
-export const expected1 = 43614;
-export function solve1(lines: string[]): number {
-  const input = parseInput(lines);
-  let sum = 0;
+export class Solution extends AbstractSolution {
+  @Expect(43614)
+  override solve1(): string | number {
+    const input = parseInput(this.lines);
+    let sum = 0;
 
-  for (const mtr of input) {
-    sum += computeRefValue(mtr);
+    for (const mtr of input) {
+      sum += computeRefValue(mtr);
+    }
+
+    return sum;
   }
 
-  return sum;
-}
+  @Expect(36771)
+  override solve2(): string | number {
+    const input = parseInput(this.lines);
+    let sum = 0;
 
-export const expected2 = 36771;
-export function solve2(lines: string[]): number {
-  const input = parseInput(lines);
-  let sum = 0;
+    for (const mtr of input) {
+      sum += computeRefValue2(mtr);
+    }
 
-  for (const mtr of input) {
-    sum += computeRefValue2(mtr);
+    return sum;
   }
-
-  return sum;
 }

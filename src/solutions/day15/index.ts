@@ -1,3 +1,6 @@
+import { Expect } from '../../../lib/dec';
+import { AbstractSolution } from '../../../lib/types';
+
 interface Lense {
   label: string;
   len: number;
@@ -61,14 +64,16 @@ function compute(operations: string[]): number {
     .reduce((acc, x) => acc + x, 0);
 }
 
-export const expected1 = 511_416;
-export function solve1(lines: string[]): number {
-  return parseInput(lines[0]!)
-    .map(hash)
-    .reduce((acc, x) => acc + x, 0);
-}
+export class Solution extends AbstractSolution {
+  @Expect(511_416)
+  override solve1(): string | number {
+    return parseInput(this.lines[0]!)
+      .map(hash)
+      .reduce((acc, x) => acc + x, 0);
+  }
 
-export const expected2 = 290_779;
-export function solve2(lines: string[]): number {
-  return compute(parseInput(lines[0]!));
+  @Expect(290_779)
+  override solve2(): string | number {
+    return compute(parseInput(this.lines[0]!));
+  }
 }

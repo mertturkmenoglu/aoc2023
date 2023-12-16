@@ -1,3 +1,6 @@
+import { Expect } from '../../../lib/dec';
+import { AbstractSolution } from '../../../lib/types';
+
 type Dir = 'N' | 'W' | 'S' | 'E';
 type Grid = string[][];
 
@@ -81,41 +84,43 @@ function cycle(mtr: Grid): void {
   tiltHor(mtr, 'E');
 }
 
-export const expected1 = 109833;
-export function solve1(lines: string[]): number {
-  const mtr = parseInput(lines);
-  tiltVert(mtr, 'N');
-  return getLoad(mtr);
-}
-
-export const expected2 = 99_875;
-export function solve2(lines: string[]): number {
-  const mtr = parseInput(lines);
-  const CYCLE_COUNT = 1_000_000_000;
-  const prev = new Map<string, number>();
-
-  while (true) {
-    cycle(mtr);
-    const key = JSON.stringify(mtr);
-
-    if (!prev.has(key)) {
-      prev.set(key, 1);
-      continue;
-    }
-
-    const seenTimes = prev.get(key)!;
-
-    if (seenTimes === 2) break;
-
-    prev.set(key, 2);
+export class Solution extends AbstractSolution {
+  @Expect(109833)
+  override solve1(): string | number {
+    const mtr = parseInput(this.lines);
+    tiltVert(mtr, 'N');
+    return getLoad(mtr);
   }
 
-  const states = [...prev]
-    .filter(([, seen]) => seen === 2)
-    .map(([key]) => JSON.parse(key) as Grid);
+  @Expect(99_875)
+  override solve2(): string | number {
+    const mtr = parseInput(this.lines);
+    const CYCLE_COUNT = 1_000_000_000;
+    const prev = new Map<string, number>();
 
-  const offset = prev.size - states.length;
-  const i = (CYCLE_COUNT - offset) % states.length;
+    while (true) {
+      cycle(mtr);
+      const key = JSON.stringify(mtr);
 
-  return getLoad(states[i - 1]!);
+      if (!prev.has(key)) {
+        prev.set(key, 1);
+        continue;
+      }
+
+      const seenTimes = prev.get(key)!;
+
+      if (seenTimes === 2) break;
+
+      prev.set(key, 2);
+    }
+
+    const states = [...prev]
+      .filter(([, seen]) => seen === 2)
+      .map(([key]) => JSON.parse(key) as Grid);
+
+    const offset = prev.size - states.length;
+    const i = (CYCLE_COUNT - offset) % states.length;
+
+    return getLoad(states[i - 1]!);
+  }
 }

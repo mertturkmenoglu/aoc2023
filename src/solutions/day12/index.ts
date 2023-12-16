@@ -1,3 +1,6 @@
+import { Expect } from '../../../lib/dec';
+import { AbstractSolution } from '../../../lib/types';
+
 type Row = [springs: string, groups: number[]];
 
 function parseInput(lines: string[], sol: number): Row[] {
@@ -57,16 +60,18 @@ function count(row: Row): number {
   return result;
 }
 
-export const expected1 = 8022;
-export function solve1(lines: string[]): number {
-  return parseInput(lines, 1)
-    .map(count)
-    .reduce((acc, x) => acc + x, 0);
-}
+export class Solution extends AbstractSolution {
+  @Expect(8022)
+  override solve1(): string | number {
+    return parseInput(this.lines, 1)
+      .map(count)
+      .reduce((acc, x) => acc + x, 0);
+  }
 
-export const expected2 = 4_968_620_679_637;
-export function solve2(lines: string[]): number {
-  return parseInput(lines, 2)
-    .map(count)
-    .reduce((acc, x) => acc + x, 0);
+  @Expect(4_968_620_679_637)
+  override solve2(): string | number {
+    return parseInput(this.lines, 2)
+      .map(count)
+      .reduce((acc, x) => acc + x, 0);
+  }
 }

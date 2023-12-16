@@ -1,3 +1,6 @@
+import { Expect } from '../../../lib/dec';
+import { AbstractSolution } from '../../../lib/types';
+
 const handTypes = [
   'High',
   'One',
@@ -98,16 +101,18 @@ function compareHands(a: Hand, b: Hand, s2?: boolean): number {
   return values.find((v) => v !== 0) ?? 0;
 }
 
-export const expected1 = 253910319;
-export function solve1(lines: string[]): number {
-  const hands = parseInput(lines);
-  hands.sort(compareHands);
-  return hands.reduce((acc, hand, i) => acc + hand.bid * (i + 1), 0);
-}
+export class Solution extends AbstractSolution {
+  @Expect(253_910_319)
+  override solve1(): string | number {
+    const hands = parseInput(this.lines);
+    hands.sort(compareHands);
+    return hands.reduce((acc, hand, i) => acc + hand.bid * (i + 1), 0);
+  }
 
-export const expected2 = 254083736;
-export function solve2(lines: string[]): number {
-  const hands = parseInput(lines, true);
-  hands.sort((a, b) => compareHands(a, b, true));
-  return hands.reduce((acc, hand, i) => acc + hand.bid * (i + 1), 0);
+  @Expect(254_083_736)
+  override solve2(): string | number {
+    const hands = parseInput(this.lines, true);
+    hands.sort((a, b) => compareHands(a, b, true));
+    return hands.reduce((acc, hand, i) => acc + hand.bid * (i + 1), 0);
+  }
 }

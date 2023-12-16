@@ -1,3 +1,6 @@
+import { Expect } from '../../../lib/dec';
+import { AbstractSolution } from '../../../lib/types';
+
 interface TNode {
   value: string;
   left: string;
@@ -97,17 +100,19 @@ function findSteps(
   return steps;
 }
 
-export const expected1 = 13019;
-export function solve1(lines: string[]): number {
-  const input = parseInput(lines);
-  return findSteps(input.network[0]!, input, 1);
-}
+export class Solution extends AbstractSolution {
+  @Expect(13_019)
+  override solve1(): string | number {
+    const input = parseInput(this.lines);
+    return findSteps(input.network[0]!, input, 1);
+  }
 
-export const expected2 = 13_524_038_372_771;
-export function solve2(lines: string[]): number {
-  const input = parseInput(lines);
-  return input.network
-    .filter((v) => v.value.endsWith('A'))
-    .map((p) => findSteps(p, input, 2))
-    .reduce((acc, x) => lcm(acc, x));
+  @Expect(13_524_038_372_771)
+  override solve2(): string | number {
+    const input = parseInput(this.lines);
+    return input.network
+      .filter((v) => v.value.endsWith('A'))
+      .map((p) => findSteps(p, input, 2))
+      .reduce((acc, x) => lcm(acc, x));
+  }
 }

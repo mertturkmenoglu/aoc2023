@@ -1,3 +1,6 @@
+import { Expect } from '../../../lib/dec';
+import { AbstractSolution } from '../../../lib/types';
+
 const parseInput = (lines: string[]): number[][] =>
   lines.map((line) => line.split(' ').map(Number));
 
@@ -32,10 +35,14 @@ function prevValue(history: number[]): number {
     .reduce((acc, i) => list[i]! - acc, 0);
 }
 
-export const expected1 = 1_995_001_648;
-export const solve1 = (lines: string[]): number =>
-  parseInput(lines).reduce((acc, x) => acc + nextValue(x), 0);
+export class Solution extends AbstractSolution {
+  @Expect(1_995_001_648)
+  override solve1(): string | number {
+    return parseInput(this.lines).reduce((acc, x) => acc + nextValue(x), 0);
+  }
 
-export const expected2 = 988;
-export const solve2 = (lines: string[]): number =>
-  parseInput(lines).reduce((acc, x) => acc + prevValue(x), 0);
+  @Expect(988)
+  override solve2(): string | number {
+    return parseInput(this.lines).reduce((acc, x) => acc + prevValue(x), 0);
+  }
+}

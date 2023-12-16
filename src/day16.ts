@@ -28,17 +28,11 @@ function inGrid(grid: Grid, [row, col]: Pos): boolean {
 }
 
 function advanceEmptySpace(pos: Pos, dir: Dir): Pos {
-  let newRow = pos[0];
-  let newCol = pos[1];
   if (dir === 'L' || dir === 'R') {
-    newCol += dir === 'L' ? -1 : 1;
+    return [pos[0], pos[1] + (dir === 'L' ? -1 : 1)];
   }
 
-  if (dir === 'U' || dir === 'D') {
-    newRow += dir === 'D' ? 1 : -1;
-  }
-
-  return [newRow, newCol];
+  return [pos[0] + (dir === 'D' ? 1 : -1), pos[1]];
 }
 
 function advanceBackMirror([row, col]: Pos, dir: Dir): [Pos, Dir] {
@@ -134,23 +128,14 @@ function countEnergizedCells(grid: Grid, startBeam: Beam): number {
 
       if (curr === '.') {
         pos = advanceEmptySpace(pos, dir);
-      } else if (curr === '\\') {
-        const [newPos, newDir] = advanceBackMirror(pos, dir);
+      } else if (curr === '\\' || curr === '/') {
+        const fn = curr === '/' ? advanceForwardMirror : advanceBackMirror;
+        const [newPos, newDir] = fn(pos, dir);
         pos = newPos;
         dir = newDir;
-      } else if (curr === '/') {
-        const [newPos, newDir] = advanceForwardMirror(pos, dir);
-        pos = newPos;
-        dir = newDir;
-      } else if (curr === '|') {
-        const [newPos, newDir, newBeam] = advanceVertSplitter(pos, dir);
-        pos = newPos;
-        dir = newDir;
-        if (newBeam !== null) {
-          beams.push(newBeam);
-        }
-      } else if (curr === '-') {
-        const [newPos, newDir, newBeam] = advanceHorSplitter(pos, dir);
+      } else if (curr === '|' || curr === '-') {
+        const fn = curr === '|' ? advanceVertSplitter : advanceHorSplitter;
+        const [newPos, newDir, newBeam] = fn(pos, dir);
         pos = newPos;
         dir = newDir;
         if (newBeam !== null) {

@@ -1,5 +1,4 @@
-import { Expect } from '../../../lib/dec';
-import { AbstractSolution } from '../../../lib/types';
+import { Expect, AbstractSolution } from '../../../lib';
 
 interface Race {
   time: number;

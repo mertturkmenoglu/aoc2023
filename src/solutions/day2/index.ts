@@ -1,5 +1,4 @@
-import { Expect } from '../../../lib/dec';
-import { AbstractSolution } from '../../../lib/types';
+import { AbstractSolution, Expect } from '../../../lib';
 
 interface Game {
   id: number;

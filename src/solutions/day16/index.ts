@@ -1,11 +1,4 @@
-import { Expect } from '../../../lib/dec';
-import { AbstractSolution } from '../../../lib/types';
-
-type Grid = string[][];
-
-type Pos = [number, number];
-
-type PosStr = string;
+import { AbstractSolution, Expect, type Grid, type Pos } from '../../../lib';
 
 type Dir = 'U' | 'L' | 'D' | 'R';
 
@@ -14,11 +7,11 @@ interface Beam {
   dir: Dir;
 }
 
-function parseInput(lines: string[]): Grid {
+function parseInput(lines: string[]): Grid<string> {
   return lines.map((line) => line.split(''));
 }
 
-function inGrid(grid: Grid, [row, col]: Pos): boolean {
+function inGrid(grid: Grid<string>, [row, col]: Pos): boolean {
   if (row < 0 || row >= grid.length) {
     return false;
   }
@@ -108,8 +101,8 @@ function advanceHorSplitter(
   return [[row, col - 1], 'L', { pos: [row, col + 1], dir: 'R' }];
 }
 
-function countEnergizedCells(grid: Grid, startBeam: Beam): number {
-  const energizedCells = new Map<PosStr, boolean>();
+function countEnergizedCells(grid: Grid<string>, startBeam: Beam): number {
+  const energizedCells = new Map<string, boolean>();
   const prev = new Map<string, boolean>();
   const beams: Beam[] = [startBeam];
 

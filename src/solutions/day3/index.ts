@@ -1,3 +1,6 @@
+import { Expect } from '../../../lib/dec';
+import { AbstractSolution } from '../../../lib/types';
+
 /* eslint-disable @typescript-eslint/strict-boolean-expressions */
 const sym = (s: string): boolean => s !== '.';
 const num = (s: string | undefined): s is string => !!s && !isNaN(parseInt(s));
@@ -65,37 +68,39 @@ function getGearRatio(l: string[], i: number, j: number): number {
   return adj.length === 2 ? adj[0]! * adj[1]! : -1;
 }
 
-export const expected1 = 537732;
-export function solve1(lines: string[]): number {
-  return lines.reduce((acc, line, i) => {
-    let j = 0;
-    let sum = 0;
-    while (j < line.length) {
-      if (num(line[j])) {
-        const start = j;
-        while (num(line[j])) {
-          j++;
+export class Solution extends AbstractSolution {
+  @Expect(537_732)
+  override solve1(): string | number {
+    return this.lines.reduce((acc, line, i) => {
+      let j = 0;
+      let sum = 0;
+      while (j < line.length) {
+        if (num(line[j])) {
+          const start = j;
+          while (num(line[j])) {
+            j++;
+          }
+          sum += isAdj(this.lines, i, start, j) ? +line.substring(start, j) : 0;
         }
-        sum += isAdj(lines, i, start, j) ? +line.substring(start, j) : 0;
+        j++;
       }
-      j++;
-    }
-    return acc + sum;
-  }, 0);
-}
-
-export const expected2 = 84883664;
-export function solve2(lines: string[]): number {
-  let sum = 0;
-
-  for (let i = 0; i < lines.length; i++) {
-    for (let j = 0; j < lines[i]!.length; j++) {
-      if (lines[i]![j]! === '*') {
-        const r = getGearRatio(lines, i, j);
-        sum += r !== -1 ? r : 0;
-      }
-    }
+      return acc + sum;
+    }, 0);
   }
 
-  return sum;
+  @Expect(84_883_664)
+  override solve2(): string | number {
+    let sum = 0;
+
+    for (let i = 0; i < this.lines.length; i++) {
+      for (let j = 0; j < this.lines[i]!.length; j++) {
+        if (this.lines[i]![j]! === '*') {
+          const r = getGearRatio(this.lines, i, j);
+          sum += r !== -1 ? r : 0;
+        }
+      }
+    }
+
+    return sum;
+  }
 }

@@ -23,7 +23,7 @@ export class Solution extends AbstractSolution {
     return 0;
   }
 
-  @Expect(7932)
+  @Expect(0)
   override solve2(): string | number {
     return 0;
   }

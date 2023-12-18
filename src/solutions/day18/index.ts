@@ -4,10 +4,13 @@ import {
   isNumberString,
   type Grid,
   type Pos,
+  adjMap,
 } from '../../../lib';
 
+type Dir = 'R' | 'L' | 'U' | 'D';
+
 interface Ins {
-  dir: 'R' | 'L' | 'U' | 'D';
+  dir: Dir;
   len: number;
   color: string;
 }
@@ -54,6 +57,32 @@ export class Solution extends AbstractSolution {
     });
   }
 
+  parseInput2(): Ins[] {
+    return this.lines.map((line) => {
+      const [, , colorstr] = line.split(' ');
+      const color = colorstr!.substring(2, colorstr!.length - 1);
+      const hexLen = color.substring(0, color.length - 1);
+      const hexIns = color[color.length - 1]!;
+      let dir: Dir = 'R';
+
+      if (hexIns === '0') {
+        dir = 'R';
+      } else if (hexIns === '1') {
+        dir = 'D';
+      } else if (hexIns === '2') {
+        dir = 'L';
+      } else {
+        dir = 'U';
+      }
+
+      return {
+        color,
+        dir,
+        len: parseInt(hexLen, 16),
+      };
+    });
+  }
+
   executeInstructions(): void {
     let row = this.startRow;
     let col = this.startCol;
@@ -80,20 +109,9 @@ export class Solution extends AbstractSolution {
     const visited = new Set<string>();
 
     while (stack.length > 0) {
-      // console.log('len', stack.length);
       const [r, c] = stack.pop()!;
-      const mapping: Pos[] = [
-        [-1, -1],
-        [-1, 0],
-        [-1, 1],
-        [0, -1],
-        [0, 1],
-        [1, -1],
-        [1, 0],
-        [1, 1],
-      ];
 
-      for (const [dr, dc] of mapping) {
+      for (const [dr, dc] of adjMap) {
         const p: Pos = [r + dr, c + dc];
         if (this.grid[p[0]]![p[1]] !== '#' && !visited.has(JSON.stringify(p))) {
           stack.push(p);
@@ -119,17 +137,47 @@ export class Solution extends AbstractSolution {
     return counter;
   }
 
+  // Solve using iteration and BFS
   @Expect(67_891)
   override solve1(): string | number {
     this.executeInstructions();
     this.fill();
-    // const a = this.grid.map((x) => x.join('')).join('\n');
-    // fs.writeFileSync('mytestfile.txt', a);
     return this.count();
   }
 
-  @Expect(0)
+  @Expect(94_116_351_948_493)
   override solve2(): string | number {
-    return 0;
+    const instructions = this.parseInput2();
+    const points: Pos[] = [[0, 0]];
+    const dirs: Record<Dir, Pos> = {
+      U: [-1, 0],
+      D: [1, 0],
+      L: [0, -1],
+      R: [0, 1],
+    };
+
+    let counter = 0;
+
+    for (const ins of instructions) {
+      const [dr, dc] = dirs[ins.dir];
+      counter += ins.len;
+      const [r, c] = points.at(-1)!;
+      points.push([r + dr * ins.len, c + dc * ins.len]);
+    }
+
+    // Shoelace formula + Pick's theorem
+
+    let sum = 0;
+
+    for (let i = 0; i < points.length; i++) {
+      const xi = points[i]![0]!;
+      const yprev = points.at(i - 1)![1];
+      const ynext = points[(i + 1) % points.length]![1];
+      sum += xi * (yprev - ynext);
+    }
+
+    const A = Math.abs(sum) / 2;
+    const i = A - counter / 2 + 1;
+    return i + counter;
   }
 }

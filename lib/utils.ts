@@ -9,3 +9,12 @@ export function isNumberString(s: string): boolean {
 export type Grid<T> = T[][];
 
 export type Pos = [number, number];
+
+export const hvAdjMap: Pos[] = [
+  [-1, 0],
+  [1, 0],
+  [0, -1],
+  [0, 1],
+];
+
+export const adjMap: Pos[] = [...hvAdjMap, [-1, -1], [-1, 1], [1, -1], [1, 1]];

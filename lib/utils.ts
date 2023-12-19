@@ -2,6 +2,10 @@ export function sum(arr: number[]): number {
   return arr.reduce((acc, x) => acc + x, 0);
 }
 
+export function prod(arr: number[]): number {
+  return arr.reduce((acc, x) => acc * x, 1);
+}
+
 export function isNumberString(s: string): boolean {
   return !isNaN(parseFloat(s));
 }

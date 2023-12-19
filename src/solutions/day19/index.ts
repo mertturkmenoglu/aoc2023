@@ -97,43 +97,30 @@ export class Solution extends AbstractSolution {
 
   workflow(input: Input, processors: Record<string, Condition[]>): number {
     let label = 'in';
-    let ended = false;
-    let accepted = false;
 
-    while (!ended) {
+    while (label !== 'A' && label !== 'R') {
       const conditions = processors[label] ?? [];
 
       for (const cond of conditions) {
         if (cond.op !== undefined) {
-          const varName = cond.var!;
-          const op = cond.op;
+          const field = cond.var!;
           const val = cond.val!;
 
           const check =
-            op === '<' ? input[varName] < val : input[varName] > val;
+            cond.op === '<' ? input[field] < val : input[field] > val;
 
           if (check) {
             label = cond.target;
-            if (label === 'A' || label === 'R') {
-              ended = true;
-              accepted = label === 'A';
-            }
             break;
           }
         } else {
-          if (cond.target === 'A' || cond.target === 'R') {
-            ended = true;
-            accepted = cond.target === 'A';
-            break;
-          } else {
-            label = cond.target;
-            break;
-          }
+          label = cond.target;
+          break;
         }
       }
     }
 
-    if (!accepted) {
+    if (label === 'R') {
       return 0;
     }
 

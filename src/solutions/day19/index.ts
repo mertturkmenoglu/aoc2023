@@ -1,0 +1,183 @@
+import { Expect, AbstractSolution, sum } from '../../../lib';
+
+interface Input {
+  x: number;
+  m: number;
+  a: number;
+  s: number;
+}
+
+interface Processor {
+  label: string;
+  conditions: Condition[];
+}
+
+interface Condition {
+  var?: string;
+  op?: string;
+  val?: number;
+  target: string;
+}
+
+interface FileInput {
+  processors: Processor[];
+  inputs: Input[];
+}
+
+export class Solution extends AbstractSolution {
+  parseCondition(s: string): Condition {
+    if (!s.includes(':')) {
+      return {
+        target: s,
+      };
+    }
+
+    const [condStr, target] = s.split(':') as [string, string];
+    const op = condStr.includes('>') ? '>' : '<';
+    const [varstr, valstr] = condStr.split(op);
+
+    return {
+      target,
+      op,
+      var: varstr!,
+      val: +valstr!,
+    };
+  }
+
+  parseProcessors(sec: string[]): Processor[] {
+    return sec.map((line) => {
+      let [label, conditionsSec] = line.split('{');
+      conditionsSec = conditionsSec!.substring(0, conditionsSec!.length - 1);
+      return {
+        label: label!,
+        conditions: conditionsSec.split(',').map((x) => this.parseCondition(x)),
+      };
+    });
+  }
+
+  parseInputs(sec: string[]): Input[] {
+    return sec
+      .map((s) => s.substring(1, s.length - 1))
+      .map((line) => {
+        const parts = line.split(',');
+        const [x, m, a, s] = parts.map((p) => {
+          return +p.split('=')[1]!;
+        });
+        return {
+          x: x!,
+          m: m!,
+          a: a!,
+          s: s!,
+        };
+      });
+  }
+
+  parseInput(): FileInput {
+    const processorsSec: string[] = [];
+
+    for (const line of this.lines) {
+      if (line !== '') {
+        processorsSec.push(line);
+      } else {
+        break;
+      }
+    }
+
+    const inputSec: string[] = [];
+    for (let i = processorsSec.length + 1; i < this.lines.length; i++) {
+      inputSec.push(this.lines[i]!);
+    }
+
+    return {
+      processors: this.parseProcessors(processorsSec),
+      inputs: this.parseInputs(inputSec),
+    };
+  }
+
+  workflow(input: Input, processors: Processor[]): number {
+    let label = 'in';
+    let ended = false;
+    let accepted = false;
+
+    const getVal = (s: string): number => {
+      if (s === 'x') {
+        return input.x;
+      }
+
+      if (s === 'm') {
+        return input.m;
+      }
+
+      if (s === 'a') {
+        return input.a;
+      }
+
+      return input.s;
+    };
+
+    while (!ended) {
+      const processor = processors.find((p) => p.label === label)!;
+      const conditions = processor.conditions;
+
+      for (const cond of conditions) {
+        if (cond.op !== undefined) {
+          const varName = cond.var!;
+          const op = cond.op;
+          const val = cond.val!;
+
+          if (op === '<') {
+            if (getVal(varName) < val) {
+              label = cond.target;
+              if (label === 'A' || label === 'R') {
+                ended = true;
+                accepted = label === 'A';
+              }
+              break;
+            }
+          } else {
+            if (getVal(varName) > val) {
+              label = cond.target;
+              if (label === 'A' || label === 'R') {
+                ended = true;
+                accepted = label === 'A';
+              }
+              break;
+            }
+          }
+        } else {
+          if (cond.target === 'A' || cond.target === 'R') {
+            ended = true;
+            accepted = cond.target === 'A';
+            break;
+          } else {
+            label = cond.target;
+            break;
+          }
+        }
+      }
+    }
+
+    if (!accepted) {
+      return 0;
+    }
+
+    return input.x + input.m + input.a + input.s;
+  }
+
+  compute(fi: FileInput): number {
+    const results = fi.inputs.map((inp) => this.workflow(inp, fi.processors));
+    console.log(results);
+    return sum(results);
+  }
+
+  @Expect(0)
+  override solve1(): string | number {
+    const fi = this.parseInput();
+    return this.compute(fi);
+  }
+
+  @Expect(0)
+  override solve2(): string | number {
+    return 0;
+  }
+}

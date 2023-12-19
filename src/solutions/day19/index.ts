@@ -26,20 +26,20 @@ export class Solution extends AbstractSolution {
 
     const [condStr, target] = s.split(':') as [string, string];
     const op = condStr.includes('>') ? '>' : '<';
-    const [varstr, valstr] = condStr.split(op);
+    const [field, valstr] = condStr.split(op);
 
     const isField = (str: string): str is Field => {
       return str === 'x' || str === 'm' || str === 'a' || str === 's';
     };
 
-    if (varstr === undefined || !isField(varstr)) {
+    if (field === undefined || !isField(field)) {
       throw new Error('invalid input');
     }
 
     return {
       target,
       op,
-      var: varstr,
+      var: field,
       val: +valstr!,
     };
   }
@@ -70,20 +70,9 @@ export class Solution extends AbstractSolution {
   }
 
   parseInput(): FileInput {
-    const processorsSec: string[] = [];
-
-    for (const line of this.lines) {
-      if (line !== '') {
-        processorsSec.push(line);
-      } else {
-        break;
-      }
-    }
-
-    const inputSec: string[] = [];
-    for (let i = processorsSec.length + 1; i < this.lines.length; i++) {
-      inputSec.push(this.lines[i]!);
-    }
+    const i = this.lines.findIndex((l) => l === '');
+    const processorsSec = this.lines.slice(0, i);
+    const inputSec: string[] = this.lines.slice(processorsSec.length + 1);
 
     const p: Record<string, Condition[]> = {};
 
@@ -98,34 +87,28 @@ export class Solution extends AbstractSolution {
   }
 
   acceptable(input: Input, label = 'in'): boolean {
-    if (label === 'A') {
-      return true;
-    }
-
-    if (label === 'R') {
-      return false;
+    if (label === 'A' || label === 'R') {
+      return label === 'A';
     }
 
     const conditions = this.processors[label] ?? [];
+    const conds = conditions.slice(0, conditions.length - 1);
+    const fallback = conditions.at(-1)!;
 
-    for (const cond of conditions) {
+    for (const cond of conds) {
       if (cond.op !== undefined) {
-        const field = cond.var!;
-        const val = cond.val!;
-
-        const check = cond.op === '<' ? input[field] < val : input[field] > val;
+        const check =
+          cond.op === '<'
+            ? input[cond.var!] < cond.val!
+            : input[cond.var!] > cond.val!;
 
         if (check) {
-          label = cond.target;
-          break;
+          return this.acceptable(input, cond.target);
         }
-      } else {
-        label = cond.target;
-        break;
       }
     }
 
-    return this.acceptable(input, label);
+    return this.acceptable(input, fallback.target);
   }
 
   compute(fi: FileInput): number {

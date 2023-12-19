@@ -1,4 +1,4 @@
-import { Expect, AbstractSolution, sum } from '../../../lib';
+import { Expect, AbstractSolution, sum, prod } from '../../../lib';
 
 type Field = 'x' | 'm' | 'a' | 's';
 
@@ -6,7 +6,7 @@ type IncRange = [number, number];
 
 type Input = Record<Field, number>;
 
-interface Cond {
+interface CompCond {
   field: Field;
   op: string;
   val: number;
@@ -17,15 +17,11 @@ interface FallbackCond {
   target: string;
 }
 
-type Condition = Cond | FallbackCond;
+type Condition = CompCond | FallbackCond;
 
 interface FileInput {
   processors: Record<string, Condition[]>;
   inputs: Input[];
-}
-
-function isCond(c: Condition): c is Cond {
-  return (c as any).op !== undefined;
 }
 
 export class Solution extends AbstractSolution {
@@ -48,15 +44,18 @@ export class Solution extends AbstractSolution {
     };
   }
 
-  parseProcessors(sec: string[]): Array<[string, Condition[]]> {
-    return sec.map((line) => {
-      let [label, conditionsSec] = line.split('{');
-      conditionsSec = conditionsSec!.substring(0, conditionsSec!.length - 1);
-      return [
-        label!,
-        conditionsSec.split(',').map((x) => this.parseCondition(x)),
-      ];
-    });
+  parseProcessors(sec: string[]): Record<string, Condition[]> {
+    const r: Record<string, Condition[]> = {};
+
+    for (const line of sec) {
+      const [label, conditionsSec] = line.split('{') as [string, string];
+      r[label] = conditionsSec
+        .substring(0, conditionsSec.length - 1)
+        .split(',')
+        .map((x) => this.parseCondition(x));
+    }
+
+    return r;
   }
 
   parseInputs(sec: string[]): Input[] {
@@ -78,14 +77,8 @@ export class Solution extends AbstractSolution {
     const processorsSec = this.lines.slice(0, i);
     const inputSec: string[] = this.lines.slice(processorsSec.length + 1);
 
-    const p: Record<string, Condition[]> = {};
-
-    for (const [l, c] of this.parseProcessors(processorsSec)) {
-      p[l] = c;
-    }
-
     return {
-      processors: p,
+      processors: this.parseProcessors(processorsSec),
       inputs: this.parseInputs(inputSec),
     };
   }
@@ -95,20 +88,18 @@ export class Solution extends AbstractSolution {
       return label === 'A';
     }
 
-    const conditions = this.processors[label] ?? [];
-    const conds = conditions.slice(0, conditions.length - 1);
-    const fallback = conditions.at(-1)!;
+    const w = this.processors[label]!;
+    const conds = w.slice(0, w.length - 1) as CompCond[];
+    const fallback = w.at(-1)!;
 
     for (const cond of conds) {
-      if (isCond(cond)) {
-        const check =
-          cond.op === '<'
-            ? input[cond.field] < cond.val
-            : input[cond.field] > cond.val;
+      const check =
+        cond.op === '<'
+          ? input[cond.field] < cond.val
+          : input[cond.field] > cond.val;
 
-        if (check) {
-          return this.acceptable(input, cond.target);
-        }
+      if (check) {
+        return this.acceptable(input, cond.target);
       }
     }
 
@@ -130,17 +121,11 @@ export class Solution extends AbstractSolution {
     }
 
     if (label === 'A') {
-      let prod = 1;
-
-      for (const [lo, hi] of Object.values(ranges)) {
-        prod *= hi - lo + 1;
-      }
-
-      return prod;
+      return prod(Object.values(ranges).map(([lo, hi]) => hi - lo + 1));
     }
 
     const w = this.processors[label]!;
-    const conditions = w.slice(0, w.length - 1) as Cond[];
+    const conditions = w.slice(0, w.length - 1) as CompCond[];
     const fallback = w.at(-1) as FallbackCond;
 
     let counter = 0;
@@ -183,7 +168,7 @@ export class Solution extends AbstractSolution {
     return this.compute(fi);
   }
 
-  @Expect(0)
+  @Expect(117_954_800_808_317)
   override solve2(): string | number {
     const ranges: Record<Field, IncRange> = {
       x: [1, 4000],

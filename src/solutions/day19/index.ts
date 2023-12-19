@@ -1,11 +1,8 @@
 import { Expect, AbstractSolution, sum } from '../../../lib';
 
-interface Input {
-  x: number;
-  m: number;
-  a: number;
-  s: number;
-}
+type Field = 'x' | 'm' | 'a' | 's';
+
+type Input = Record<Field, number>;
 
 interface Processor {
   label: string;
@@ -13,7 +10,7 @@ interface Processor {
 }
 
 interface Condition {
-  var?: string;
+  var?: Field;
   op?: string;
   val?: number;
   target: string;
@@ -27,19 +24,25 @@ interface FileInput {
 export class Solution extends AbstractSolution {
   parseCondition(s: string): Condition {
     if (!s.includes(':')) {
-      return {
-        target: s,
-      };
+      return { target: s };
     }
 
     const [condStr, target] = s.split(':') as [string, string];
     const op = condStr.includes('>') ? '>' : '<';
     const [varstr, valstr] = condStr.split(op);
 
+    const isField = (str: string): str is Field => {
+      return str === 'x' || str === 'm' || str === 'a' || str === 's';
+    };
+
+    if (varstr === undefined || !isField(varstr)) {
+      throw new Error('invalid input');
+    }
+
     return {
       target,
       op,
-      var: varstr!,
+      var: varstr,
       val: +valstr!,
     };
   }
@@ -59,15 +62,12 @@ export class Solution extends AbstractSolution {
     return sec
       .map((s) => s.substring(1, s.length - 1))
       .map((line) => {
-        const parts = line.split(',');
-        const [x, m, a, s] = parts.map((p) => {
-          return +p.split('=')[1]!;
-        });
+        const v = line.split(',').map((p) => +p.split('=')[1]!);
         return {
-          x: x!,
-          m: m!,
-          a: a!,
-          s: s!,
+          x: v[0]!,
+          m: v[1]!,
+          a: v[2]!,
+          s: v[3]!,
         };
       });
   }
@@ -99,50 +99,25 @@ export class Solution extends AbstractSolution {
     let ended = false;
     let accepted = false;
 
-    const getVal = (s: string): number => {
-      if (s === 'x') {
-        return input.x;
-      }
-
-      if (s === 'm') {
-        return input.m;
-      }
-
-      if (s === 'a') {
-        return input.a;
-      }
-
-      return input.s;
-    };
-
     while (!ended) {
       const processor = processors.find((p) => p.label === label)!;
-      const conditions = processor.conditions;
 
-      for (const cond of conditions) {
+      for (const cond of processor.conditions) {
         if (cond.op !== undefined) {
           const varName = cond.var!;
           const op = cond.op;
           const val = cond.val!;
 
-          if (op === '<') {
-            if (getVal(varName) < val) {
-              label = cond.target;
-              if (label === 'A' || label === 'R') {
-                ended = true;
-                accepted = label === 'A';
-              }
-              break;
+          const check =
+            op === '<' ? input[varName] < val : input[varName] > val;
+
+          if (check) {
+            label = cond.target;
+            if (label === 'A' || label === 'R') {
+              ended = true;
+              accepted = label === 'A';
             }
-          } else {
-            if (getVal(varName) > val) {
-              label = cond.target;
-              if (label === 'A' || label === 'R') {
-                ended = true;
-                accepted = label === 'A';
-              }
-              break;
-            }
+            break;
           }
         } else {
           if (cond.target === 'A' || cond.target === 'R') {
@@ -166,11 +141,10 @@ export class Solution extends AbstractSolution {
 
   compute(fi: FileInput): number {
     const results = fi.inputs.map((inp) => this.workflow(inp, fi.processors));
-    console.log(results);
     return sum(results);
   }
 
-  @Expect(0)
+  @Expect(383_682)
   override solve1(): string | number {
     const fi = this.parseInput();
     return this.compute(fi);

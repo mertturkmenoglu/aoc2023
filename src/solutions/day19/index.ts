@@ -2,18 +2,30 @@ import { Expect, AbstractSolution, sum } from '../../../lib';
 
 type Field = 'x' | 'm' | 'a' | 's';
 
+type IncRange = [number, number];
+
 type Input = Record<Field, number>;
 
-interface Condition {
-  var?: Field;
-  op?: string;
-  val?: number;
+interface Cond {
+  field: Field;
+  op: string;
+  val: number;
   target: string;
 }
+
+interface FallbackCond {
+  target: string;
+}
+
+type Condition = Cond | FallbackCond;
 
 interface FileInput {
   processors: Record<string, Condition[]>;
   inputs: Input[];
+}
+
+function isCond(c: Condition): c is Cond {
+  return (c as any).op !== undefined;
 }
 
 export class Solution extends AbstractSolution {
@@ -28,18 +40,10 @@ export class Solution extends AbstractSolution {
     const op = condStr.includes('>') ? '>' : '<';
     const [field, valstr] = condStr.split(op);
 
-    const isField = (str: string): str is Field => {
-      return str === 'x' || str === 'm' || str === 'a' || str === 's';
-    };
-
-    if (field === undefined || !isField(field)) {
-      throw new Error('invalid input');
-    }
-
     return {
       target,
       op,
-      var: field,
+      field: field! as Field,
       val: +valstr!,
     };
   }
@@ -96,11 +100,11 @@ export class Solution extends AbstractSolution {
     const fallback = conditions.at(-1)!;
 
     for (const cond of conds) {
-      if (cond.op !== undefined) {
+      if (isCond(cond)) {
         const check =
           cond.op === '<'
-            ? input[cond.var!] < cond.val!
-            : input[cond.var!] > cond.val!;
+            ? input[cond.field] < cond.val
+            : input[cond.field] > cond.val;
 
         if (check) {
           return this.acceptable(input, cond.target);
@@ -120,6 +124,58 @@ export class Solution extends AbstractSolution {
     return sum(results);
   }
 
+  count(ranges: Record<Field, IncRange>, label = 'in'): number {
+    if (label === 'R') {
+      return 0;
+    }
+
+    if (label === 'A') {
+      let prod = 1;
+
+      for (const [lo, hi] of Object.values(ranges)) {
+        prod *= hi - lo + 1;
+      }
+
+      return prod;
+    }
+
+    const w = this.processors[label]!;
+    const conditions = w.slice(0, w.length - 1) as Cond[];
+    const fallback = w.at(-1) as FallbackCond;
+
+    let counter = 0;
+    let flag = true;
+
+    for (const { field, op, val, target } of conditions) {
+      const [lo, hi] = ranges[field];
+
+      const acceptable: IncRange = op === '<' ? [lo, val - 1] : [val + 1, hi];
+      const denied: IncRange = op === '<' ? [val, hi] : [lo, val];
+
+      if (acceptable[0] < acceptable[1]) {
+        const newRanges = {
+          ...ranges,
+        };
+        newRanges[field] = acceptable;
+        counter += this.count(newRanges, target);
+      }
+
+      if (denied[0] < denied[1]) {
+        ranges = { ...ranges };
+        ranges[field] = denied;
+      } else {
+        flag = false;
+        break;
+      }
+    }
+
+    if (flag) {
+      counter += this.count(ranges, fallback.target);
+    }
+
+    return counter;
+  }
+
   @Expect(383_682)
   override solve1(): string | number {
     const fi = this.parseInput();
@@ -129,6 +185,12 @@ export class Solution extends AbstractSolution {
 
   @Expect(0)
   override solve2(): string | number {
-    return 0;
+    const ranges: Record<Field, IncRange> = {
+      x: [1, 4000],
+      m: [1, 4000],
+      a: [1, 4000],
+      s: [1, 4000],
+    };
+    return this.count(ranges, 'in');
   }
 }

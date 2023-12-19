@@ -10,7 +10,7 @@ export function isNumberString(s: string): boolean {
   return !isNaN(parseFloat(s));
 }
 
-export type Grid<T> = T[][];
+export type TGrid<T> = T[][];
 
 export type Pos = [number, number];
 
@@ -22,3 +22,87 @@ export const hvAdjMap: Pos[] = [
 ];
 
 export const adjMap: Pos[] = [...hvAdjMap, [-1, -1], [-1, 1], [1, -1], [1, 1]];
+
+export class Grid<T> {
+  private mtr: T[][] = [];
+
+  constructor(list: T[][] = []) {
+    this.mtr = list;
+  }
+
+  create(dim: [number, number], fill: T): Grid<T> {
+    this.mtr = new Array(dim[0])
+      .fill(0)
+      .map(() => new Array(dim[1]).fill(fill));
+    return this;
+  }
+
+  getRow(i: number): T[] {
+    return this.mtr[i]!;
+  }
+
+  getCol(i: number): T[] {
+    return this.mtr.map((row) => row[i]!);
+  }
+
+  at(row: number, col: number): T {
+    return this.mtr[row]![col]!;
+  }
+
+  atPos(pos: Pos): T {
+    return this.at(pos[0], pos[1]);
+  }
+
+  set(row: number, col: number, v: T): void {
+    this.mtr[row]![col] = v;
+  }
+
+  setPos(pos: Pos, v: T): void {
+    this.set(pos[0], pos[1], v);
+  }
+
+  getDim(): [row: number, col: number] {
+    return [this.mtr.length, this.mtr[0]!.length];
+  }
+
+  isPosInGrid(pos: Pos): boolean {
+    const [row, col] = pos;
+    const [rowCount, colCount] = this.getDim();
+
+    if (row < 0 || row >= rowCount) {
+      return false;
+    }
+
+    if (col < 0 || col >= colCount) {
+      return false;
+    }
+
+    return true;
+  }
+
+  isValueInGrid(v: T): boolean {
+    const [row, col] = this.getDim();
+
+    for (let i = 0; i < row; i++) {
+      for (let j = 0; j < col; j++) {
+        if (this.at(i, j) === v) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  hash(): string {
+    return this.toString();
+  }
+
+  toString(): string {
+    return JSON.stringify(this.mtr);
+  }
+
+  equal(other: Grid<T>): boolean {
+    return JSON.stringify(this) === JSON.stringify(other);
+  }
+}

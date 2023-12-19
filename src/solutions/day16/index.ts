@@ -1,4 +1,4 @@
-import { AbstractSolution, Expect, type Grid, type Pos } from '../../../lib';
+import { AbstractSolution, Expect, type TGrid, type Pos } from '../../../lib';
 
 type Dir = 'U' | 'L' | 'D' | 'R';
 
@@ -7,11 +7,11 @@ interface Beam {
   dir: Dir;
 }
 
-function parseInput(lines: string[]): Grid<string> {
+function parseInput(lines: string[]): TGrid<string> {
   return lines.map((line) => line.split(''));
 }
 
-function inGrid(grid: Grid<string>, [row, col]: Pos): boolean {
+function inGrid(grid: TGrid<string>, [row, col]: Pos): boolean {
   if (row < 0 || row >= grid.length) {
     return false;
   }
@@ -101,7 +101,7 @@ function advanceHorSplitter(
   return [[row, col - 1], 'L', { pos: [row, col + 1], dir: 'R' }];
 }
 
-function countEnergizedCells(grid: Grid<string>, startBeam: Beam): number {
+function countEnergizedCells(grid: TGrid<string>, startBeam: Beam): number {
   const energizedCells = new Map<string, boolean>();
   const prev = new Map<string, boolean>();
   const beams: Beam[] = [startBeam];

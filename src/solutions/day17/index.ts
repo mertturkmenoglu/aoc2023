@@ -1,17 +1,17 @@
 import PriorityQueue from 'priorityqueuejs';
-import { Expect, AbstractSolution, type Grid } from '../../../lib';
+import { Expect, AbstractSolution, type TGrid } from '../../../lib';
 
 type El = [number, number, number, number, number, number];
 
 export class Solution extends AbstractSolution {
-  private readonly grid: Grid<number>;
+  private readonly grid: TGrid<number>;
 
   constructor(lines: string[]) {
     super(lines);
     this.grid = this.parseGrid();
   }
 
-  private parseGrid(): Grid<number> {
+  private parseGrid(): TGrid<number> {
     return this.lines.map((line) => line.split('').map((x) => +x));
   }
 

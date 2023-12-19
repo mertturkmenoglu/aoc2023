@@ -2,7 +2,7 @@ import {
   Expect,
   AbstractSolution,
   isNumberString,
-  type Grid,
+  type TGrid,
   type Pos,
   adjMap,
 } from '../../../lib';
@@ -17,7 +17,7 @@ interface Ins {
 
 export class Solution extends AbstractSolution {
   private readonly instructions: Ins[];
-  private readonly grid: Grid<string>;
+  private readonly grid: TGrid<string>;
   private readonly rowCount = 1000;
   private readonly colCount = 1000;
   private readonly startRow = this.rowCount / 2;

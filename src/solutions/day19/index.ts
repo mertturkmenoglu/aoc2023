@@ -4,11 +4,6 @@ type Field = 'x' | 'm' | 'a' | 's';
 
 type Input = Record<Field, number>;
 
-interface Processor {
-  label: string;
-  conditions: Condition[];
-}
-
 interface Condition {
   var?: Field;
   op?: string;
@@ -17,7 +12,7 @@ interface Condition {
 }
 
 interface FileInput {
-  processors: Processor[];
+  processors: Record<string, Condition[]>;
   inputs: Input[];
 }
 
@@ -47,14 +42,14 @@ export class Solution extends AbstractSolution {
     };
   }
 
-  parseProcessors(sec: string[]): Processor[] {
+  parseProcessors(sec: string[]): Array<[string, Condition[]]> {
     return sec.map((line) => {
       let [label, conditionsSec] = line.split('{');
       conditionsSec = conditionsSec!.substring(0, conditionsSec!.length - 1);
-      return {
-        label: label!,
-        conditions: conditionsSec.split(',').map((x) => this.parseCondition(x)),
-      };
+      return [
+        label!,
+        conditionsSec.split(',').map((x) => this.parseCondition(x)),
+      ];
     });
   }
 
@@ -88,21 +83,27 @@ export class Solution extends AbstractSolution {
       inputSec.push(this.lines[i]!);
     }
 
+    const p: Record<string, Condition[]> = {};
+
+    for (const [l, c] of this.parseProcessors(processorsSec)) {
+      p[l] = c;
+    }
+
     return {
-      processors: this.parseProcessors(processorsSec),
+      processors: p,
       inputs: this.parseInputs(inputSec),
     };
   }
 
-  workflow(input: Input, processors: Processor[]): number {
+  workflow(input: Input, processors: Record<string, Condition[]>): number {
     let label = 'in';
     let ended = false;
     let accepted = false;
 
     while (!ended) {
-      const processor = processors.find((p) => p.label === label)!;
+      const conditions = processors[label] ?? [];
 
-      for (const cond of processor.conditions) {
+      for (const cond of conditions) {
         if (cond.op !== undefined) {
           const varName = cond.var!;
           const op = cond.op;

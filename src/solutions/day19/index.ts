@@ -17,6 +17,8 @@ interface FileInput {
 }
 
 export class Solution extends AbstractSolution {
+  private processors: Record<string, Condition[]> = {};
+
   parseCondition(s: string): Condition {
     if (!s.includes(':')) {
       return { target: s };
@@ -95,46 +97,50 @@ export class Solution extends AbstractSolution {
     };
   }
 
-  workflow(input: Input, processors: Record<string, Condition[]>): number {
-    let label = 'in';
-
-    while (label !== 'A' && label !== 'R') {
-      const conditions = processors[label] ?? [];
-
-      for (const cond of conditions) {
-        if (cond.op !== undefined) {
-          const field = cond.var!;
-          const val = cond.val!;
-
-          const check =
-            cond.op === '<' ? input[field] < val : input[field] > val;
-
-          if (check) {
-            label = cond.target;
-            break;
-          }
-        } else {
-          label = cond.target;
-          break;
-        }
-      }
+  acceptable(input: Input, label = 'in'): boolean {
+    if (label === 'A') {
+      return true;
     }
 
     if (label === 'R') {
-      return 0;
+      return false;
     }
 
-    return input.x + input.m + input.a + input.s;
+    const conditions = this.processors[label] ?? [];
+
+    for (const cond of conditions) {
+      if (cond.op !== undefined) {
+        const field = cond.var!;
+        const val = cond.val!;
+
+        const check = cond.op === '<' ? input[field] < val : input[field] > val;
+
+        if (check) {
+          label = cond.target;
+          break;
+        }
+      } else {
+        label = cond.target;
+        break;
+      }
+    }
+
+    return this.acceptable(input, label);
   }
 
   compute(fi: FileInput): number {
-    const results = fi.inputs.map((inp) => this.workflow(inp, fi.processors));
+    const results = fi.inputs
+      .filter((inp) => this.acceptable(inp))
+      .map((x) => {
+        return sum(Object.values(x));
+      });
     return sum(results);
   }
 
   @Expect(383_682)
   override solve1(): string | number {
     const fi = this.parseInput();
+    this.processors = fi.processors;
     return this.compute(fi);
   }
 

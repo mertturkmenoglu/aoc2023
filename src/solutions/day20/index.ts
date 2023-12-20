@@ -1,5 +1,17 @@
 import { Expect, AbstractSolution } from '../../../lib';
 
+function gcd(a: number, b: number): number {
+  let temp = b;
+
+  while (b !== 0) {
+    b = a % b;
+    a = temp;
+    temp = b;
+  }
+
+  return a;
+}
+
 type ModuleType = 'broadcast' | 'flipflop' | 'conjuction';
 
 type SignalStrength = 'high' | 'low';
@@ -54,7 +66,7 @@ export class Solution extends AbstractSolution {
     }
   }
 
-  compute(): number {
+  memset(): void {
     for (const [name, module] of Object.entries(this.modules)) {
       for (const target of module.targets) {
         if (
@@ -65,6 +77,10 @@ export class Solution extends AbstractSolution {
         }
       }
     }
+  }
+
+  compute(): number {
+    this.memset();
 
     let lowCounter = 0;
     let highCounter = 0;
@@ -121,14 +137,101 @@ export class Solution extends AbstractSolution {
     return lowCounter * highCounter;
   }
 
+  compute2(): number {
+    this.memset();
+
+    const feed = Object.entries(this.modules).find(([, module]) =>
+      module.targets.includes('rx'),
+    );
+
+    if (feed === undefined) {
+      throw new Error('Cannot find a module that feeds to rx');
+    }
+
+    const [feedName] = feed;
+
+    const cycles: Record<string, number> = {};
+    const seen: Record<string, number> = {};
+    let pressCounter = 0;
+
+    for (const [name, module] of Object.entries(this.modules)) {
+      if (module.targets.includes(feedName)) {
+        seen[name] = 0;
+      }
+    }
+
+    while (true) {
+      pressCounter++;
+
+      const q: Signal[] = this.broadcastTargets.map((to) => ({
+        from: 'broadcaster',
+        to,
+        strength: 'low',
+      }));
+
+      while (q.length > 0) {
+        const { from, to, strength } = q.shift()!;
+
+        if (!Object.keys(this.modules).includes(to)) {
+          continue;
+        }
+
+        const mod = this.modules[to]!;
+
+        if (to === feedName && strength === 'high') {
+          seen[from]++;
+
+          if (!Object.keys(cycles).includes(from)) {
+            cycles[from] = pressCounter;
+          }
+
+          if (Object.values(seen).every((x) => x !== 0)) {
+            let x = 1;
+
+            for (const c of Object.values(cycles)) {
+              x = (x * c) / gcd(x, c);
+            }
+
+            return x;
+          }
+        }
+
+        if (mod.type === 'flipflop') {
+          if (strength === 'low') {
+            mod.status = mod.status === 'on' ? 'off' : 'on';
+            for (const t of mod.targets) {
+              q.push({
+                from: to,
+                to: t,
+                strength: mod.status === 'on' ? 'high' : 'low',
+              });
+            }
+          }
+        } else {
+          mod.signals[from] = strength;
+          const allHigh = Object.values(mod.signals).every((v) => v === 'high');
+          const newStr: SignalStrength = allHigh ? 'low' : 'high';
+          for (const t of mod.targets) {
+            q.push({
+              from: to,
+              to: t,
+              strength: newStr,
+            });
+          }
+        }
+      }
+    }
+  }
+
   @Expect(763_500_168)
   override solve1(): string | number {
     this.parseInput();
     return this.compute();
   }
 
-  @Expect(0)
+  @Expect(207_652_583_562_007)
   override solve2(): string | number {
-    return 0;
+    this.parseInput();
+    return this.compute2();
   }
 }

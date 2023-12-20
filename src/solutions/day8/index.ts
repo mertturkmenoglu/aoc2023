@@ -1,5 +1,4 @@
-import { Expect } from '../../../lib/dec';
-import { AbstractSolution } from '../../../lib/types';
+import { Expect, AbstractSolution, lcm } from '../../../lib';
 
 interface TNode {
   value: string;
@@ -39,22 +38,6 @@ function parseInput(lines: string[]): TInput {
     };
   }
   return inp;
-}
-
-function gcd(a: number, b: number): number {
-  let temp = b;
-
-  while (b !== 0) {
-    b = a % b;
-    a = temp;
-    temp = b;
-  }
-
-  return a;
-}
-
-function lcm(a: number, b: number): number {
-  return (a * b) / gcd(a, b);
 }
 
 function find(network: TNode[], next: string): TNode {

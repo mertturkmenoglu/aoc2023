@@ -1,16 +1,4 @@
-import { Expect, AbstractSolution } from '../../../lib';
-
-function gcd(a: number, b: number): number {
-  let temp = b;
-
-  while (b !== 0) {
-    b = a % b;
-    a = temp;
-    temp = b;
-  }
-
-  return a;
-}
+import { Expect, AbstractSolution, gcd } from '../../../lib';
 
 type ModuleType = 'broadcast' | 'flipflop' | 'conjuction';
 
@@ -35,23 +23,14 @@ export class Solution extends AbstractSolution {
 
   parseInput(): void {
     for (const line of this.lines) {
-      const startChar = line.charAt(0);
-
+      const ch = line.charAt(0);
       const [namestr, targetsstr] = line.split(' -> ');
-      const targets = targetsstr!
-        .trim()
-        .split(',')
-        .filter((x) => x !== '')
-        .map((x) => x.trim());
+      const targets = targetsstr!.trim().split(', ');
 
       const type: ModuleType =
-        startChar === '%'
-          ? 'flipflop'
-          : startChar === '&'
-            ? 'conjuction'
-            : 'broadcast';
+        ch === '%' ? 'flipflop' : ch === '&' ? 'conjuction' : 'broadcast';
 
-      const name = type === 'broadcast' ? namestr! : namestr!.substring(1);
+      const name = namestr!.substring(1);
 
       if (type !== 'broadcast') {
         this.modules[name] = {
@@ -79,62 +58,66 @@ export class Solution extends AbstractSolution {
     }
   }
 
+  initQueue(): Signal[] {
+    return this.broadcastTargets.map((to) => ({
+      from: 'broadcaster',
+      to,
+      strength: 'low',
+    }));
+  }
+
+  getNewSignals(
+    mod: Module,
+    strength: SignalStrength,
+    name: string,
+    from: string,
+  ): Signal[] {
+    if (mod.type === 'flipflop') {
+      if (strength === 'low') {
+        mod.status = mod.status === 'on' ? 'off' : 'on';
+        return mod.targets.map((t) => ({
+          from: name,
+          to: t,
+          strength: mod.status === 'on' ? 'high' : 'low',
+        }));
+      }
+      return [];
+    } else {
+      mod.signals[from] = strength;
+      const allHigh = Object.values(mod.signals).every((v) => v === 'high');
+      const newStr: SignalStrength = allHigh ? 'low' : 'high';
+      return mod.targets.map((t) => ({
+        from: name,
+        to: t,
+        strength: newStr,
+      }));
+    }
+  }
+
   compute(): number {
     this.memset();
 
-    let lowCounter = 0;
-    let highCounter = 0;
+    const count: Record<SignalStrength, number> = { low: 0, high: 0 };
 
     for (let i = 0; i < 1000; i++) {
-      lowCounter++;
-      const q: Signal[] = this.broadcastTargets.map((to) => ({
-        from: 'broadcaster',
-        to,
-        strength: 'low',
-      }));
+      count.low++;
+      const q: Signal[] = this.initQueue();
 
       while (q.length > 0) {
         const { from, to, strength } = q.shift()!;
-
-        if (strength === 'high') {
-          highCounter++;
-        } else {
-          lowCounter++;
-        }
+        count[strength]++;
 
         if (!Object.keys(this.modules).includes(to)) {
           continue;
         }
 
         const mod = this.modules[to]!;
-
-        if (mod.type === 'flipflop') {
-          if (strength === 'low') {
-            mod.status = mod.status === 'on' ? 'off' : 'on';
-            for (const t of mod.targets) {
-              q.push({
-                from: to,
-                to: t,
-                strength: mod.status === 'on' ? 'high' : 'low',
-              });
-            }
-          }
-        } else {
-          mod.signals[from] = strength;
-          const allHigh = Object.values(mod.signals).every((v) => v === 'high');
-          const newStr: SignalStrength = allHigh ? 'low' : 'high';
-          for (const t of mod.targets) {
-            q.push({
-              from: to,
-              to: t,
-              strength: newStr,
-            });
-          }
-        }
+        const newSignals = this.getNewSignals(mod, strength, to, from);
+        q.push(...newSignals);
       }
     }
 
-    return lowCounter * highCounter;
+    return count.low * count.high;
   }
 
   compute2(): number {
@@ -163,11 +146,7 @@ export class Solution extends AbstractSolution {
     while (true) {
       pressCounter++;
 
-      const q: Signal[] = this.broadcastTargets.map((to) => ({
-        from: 'broadcaster',
-        to,
-        strength: 'low',
-      }));
+      const q: Signal[] = this.initQueue();
 
       while (q.length > 0) {
         const { from, to, strength } = q.shift()!;
@@ -196,29 +175,8 @@ export class Solution extends AbstractSolution {
           }
         }
 
-        if (mod.type === 'flipflop') {
-          if (strength === 'low') {
-            mod.status = mod.status === 'on' ? 'off' : 'on';
-            for (const t of mod.targets) {
-              q.push({
-                from: to,
-                to: t,
-                strength: mod.status === 'on' ? 'high' : 'low',
-              });
-            }
-          }
-        } else {
-          mod.signals[from] = strength;
-          const allHigh = Object.values(mod.signals).every((v) => v === 'high');
-          const newStr: SignalStrength = allHigh ? 'low' : 'high';
-          for (const t of mod.targets) {
-            q.push({
-              from: to,
-              to: t,
-              strength: newStr,
-            });
-          }
-        }
+        const newSignals = this.getNewSignals(mod, strength, to, from);
+        q.push(...newSignals);
       }
     }
   }

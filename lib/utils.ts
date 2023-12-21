@@ -30,6 +30,10 @@ export type TGrid<T> = T[][];
 
 export type Pos = [number, number];
 
+export function posEq(a: Pos, b: Pos): boolean {
+  return a[0] === b[0] && a[1] === b[1];
+}
+
 export const hvAdjMap: Pos[] = [
   [-1, 0],
   [1, 0],

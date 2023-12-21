@@ -77,13 +77,13 @@ export class Grid<T> {
     this.set(pos[0], pos[1], v);
   }
 
-  getDim(): [row: number, col: number] {
+  dims(): [row: number, col: number] {
     return [this.mtr.length, this.mtr[0]!.length];
   }
 
   isPosInGrid(pos: Pos): boolean {
     const [row, col] = pos;
-    const [rowCount, colCount] = this.getDim();
+    const [rowCount, colCount] = this.dims();
 
     if (row < 0 || row >= rowCount) {
       return false;
@@ -97,7 +97,7 @@ export class Grid<T> {
   }
 
   isValueInGrid(v: T): boolean {
-    const [row, col] = this.getDim();
+    const [row, col] = this.dims();
 
     for (let i = 0; i < row; i++) {
       for (let j = 0; j < col; j++) {
@@ -108,6 +108,20 @@ export class Grid<T> {
     }
 
     return false;
+  }
+
+  getPosOfValue(v: T): Pos | null {
+    const [row, col] = this.dims();
+
+    for (let i = 0; i < row; i++) {
+      for (let j = 0; j < col; j++) {
+        if (this.at(i, j) === v) {
+          return [i, j];
+        }
+      }
+    }
+
+    return null;
   }
 
   hash(): string {
